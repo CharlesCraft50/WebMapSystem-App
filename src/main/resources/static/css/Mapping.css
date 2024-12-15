@@ -1,0 +1,1097 @@
+@font-face {
+    font-family: Inter;
+    src: url(../image/Inter-VariableFont_opsz\,wght.ttf);
+}
+
+html{
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+
+}
+
+body{
+    font-family: Inter, sans-serif;
+    height: 100%;
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    margin: 0%;
+    padding: 0%;
+}   
+
+/*Login*/
+
+.Login{
+    height: 100%;
+    width: 35%;
+    background-color: #0F3976;
+    display: flex;
+    flex-direction: column;
+    z-index: 100;
+}
+    .Login .Hello{
+        height: 40%;
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        
+    }
+        .Login .Hello p{
+            margin-bottom: -1vh;
+            margin-right: 10.5%;
+
+        }
+    .Login .MainLogin{
+        height: 60%;
+        width: 100%;
+        display: flex;
+        justify-content: flex-start;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .Login form{
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+    
+    .Login .input-group {
+        margin-bottom: 1rem;
+    }
+    
+    .Login label b{
+        font-size: 1.5vh;
+        color: aliceblue;
+        margin-bottom: 1.5vh;
+        margin-top: 1.5vh;
+    }
+    
+    .Login input[type="text"],
+    .Login input[type="password"] {
+        width: 300px;
+        padding: 10px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        display: flex;
+        align-self: center;
+    }
+    
+    .Login .Button {
+        width: 40%;
+        padding: 10px;
+        background-color: #000000;
+        color: rgb(255, 255, 255);
+        border: white 1px solid;
+        border-radius: 4px;
+        cursor: pointer;
+        text-decoration: none;
+        display: flex;
+        justify-content: center;
+    }
+    
+    .Login .Button:hover {
+        background-color: white;
+        color: #000000;
+        border-color: #000000 1px solid;
+    }
+    
+    .forgot-pass {
+        text-align: center;
+        margin-top: 10px;
+        margin-bottom: 10px;
+        cursor: pointer;
+    }
+    
+    .forgot-pass a {
+        text-decoration: none;
+        color: #ffffff;
+        font-size: 2vh;
+    }
+    
+    .forgot-pass a:hover {
+        text-decoration: underline;
+
+    }
+
+    .SignUp {
+        text-decoration: none;
+        color: white;
+        font-size: xx-small;
+        margin-top: 1vh;
+    }
+
+/*Middle*/
+
+.BackImage{
+    height: 100%;
+    width: 30%;
+    background-image: url(../image/brgy.jpg);
+    background-size: cover;
+    background-position: 40%;
+    opacity: 80%;
+    display: flex;
+    justify-content: center;
+    align-items: flex-end;
+    z-index: 100;
+}
+
+    .BackImage .Mid{
+        position: relative;
+        width: 70%;
+        display: flex;
+        color: white;
+        top: -10%;
+        
+        
+    }
+
+/*Mission & Vision*/
+
+.MaV{
+    height: 100%;
+    width: 35%;
+    background:linear-gradient(to bottom, #04598F, #737373);
+    display: flex;
+    flex-direction: column;
+    z-index: 100;
+}
+    .MaV .up{
+        height: 55%;
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: space-evenly;
+    }
+
+    .MaV .up .double-text {
+        width: 70%;
+        position: relative;
+        font-size: 2vh;
+        font-weight: bold;
+        color: white;
+        text-align: center;
+        z-index: 3;
+    }
+    .MaV .up .BackWord {
+        font-size: 10vh;
+        color: white;
+        opacity: 30%;
+        z-index: 2;
+        margin-bottom: -13%;
+
+    }
+
+
+    .MaV .down {
+        height: 45%;
+        width: 100%;
+        background:linear-gradient(to bottom, #2E9EC9, #737373);
+        border-top-left-radius: 2rem;
+        border-top-right-radius: 1rem;
+        transform: skewY(18deg);
+        transform-origin: top left;
+        display: flex;
+        align-items: flex-end;
+        justify-content: flex-start;
+    }   
+
+        .MaV .down .logo {
+            width: 70%;
+            height: 70%;
+            transform: skewY(-18deg); 
+            object-fit: contain;
+            position: relative;
+            top: -14%;
+            left: -10%;
+        }
+
+
+/*-------------------------------------Register-------------------------------------------*/
+
+.RegisterSection{
+    height: 100%;
+    width: 35%;
+    background-color: #0F3976;
+    display: flex;
+    flex-direction: column;
+}
+
+    .RegisterSection .Whole{
+        display: flex;
+        flex-direction: row;
+        height: 70%;
+        width: 100%;
+    }
+
+    .RegisterSection .buffer{
+        height: 100%;
+        width: 15%;
+    }
+
+    .RegisterSection .Hello {
+        height: 25%;
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-end;
+        margin: 0%;
+        font-size: 15px;
+    }
+
+        .RegisterSection .Hello p b{
+            margin-left: 15%;
+        }
+
+    .RegisterSection .Register{
+        height: 70%;    
+        width: 70%;
+        color: white;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .RegisterSection .form-group {
+        margin-bottom: 15px;
+
+    }
+        .RegisterSection .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            font-size: x-small;
+        }
+        .RegisterSection .form-group input {
+            width: 100%;
+            padding: 7px;
+            font-size: 12px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        .RegisterSection .form-group input:focus {
+            outline: none;
+            border-color: black;
+        }
+        .RegisterSection .register-btn {
+            display: flex;
+            width: 40%;
+            padding: 9px;
+            font-size: 12px;
+            color: white;
+            background-color: black;
+            border: 1px solid white;
+            border-radius: 4px;
+            cursor: pointer;
+            justify-content: center;
+            margin-left: 30%;
+        }
+        .RegisterSection .register-btn:hover {
+            background-color: white;
+            color: #000000;
+            border-color: black 1px solid;
+        }
+        
+        .Whole .LogIn{
+            text-decoration: none;
+            color: white;
+            font-size: xx-small;
+            margin-top: 1vh;
+            display: flex;
+            margin-left: 27%;
+        }
+
+/*--------------------------------------------New-Password---------------------------------------------*/
+
+.Successful{
+    background-color: rgb(217,217,217,0.75);
+    height: 100%;
+    width: 100%;
+    z-index: 99;
+    position:absolute;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+}
+
+    .Successful .Update{
+        background-color: #D9D9D9;
+        height: 41%;
+        width: 35%;
+        border-radius: 45px;
+        display: flex;
+        justify-content: center;
+        align-items: flex-end;
+        flex-direction: column;
+        color: #000000;
+    }
+        .Successful .Update .Mess{
+            height: 40%;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 4vh;
+            font-weight: 700;
+        }
+        .Successful .Update .MessReg{
+            height: 40%;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 4vh;
+            font-weight: 700;
+        }
+        .Successful .Update .Styler{
+            height: 60%;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+        }
+            .Successful .Update .Styler .ReturnLogin{
+                background-color: #0F3976;
+                height: 47%;
+                width: 35%;
+                border-radius: 50px;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                font-size: 4vh;
+                color: white;
+                text-decoration: none;
+            }
+
+
+
+/*----------------------------------Home-----------------------------------*/
+
+.mapWhole{
+    width: 65%;
+    height: 100%;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+}
+    .mapWhole .MaD{
+        height: 100px;
+        width: 50px;
+        position: absolute;
+        z-index: 10;
+        margin-top: 30px;
+        margin-right: 15px;
+
+    }
+        .mapWhole .MaD .Menu{
+            background-image: url(../image/Group-44.png);
+            background-size: contain;
+            background-repeat: no-repeat;
+            height: 50%;
+            width: 100%;
+        }
+
+        .mapWhole .MaD .Dash{
+            height: 50%;
+            width: 100%;
+        }
+
+        .mapWhole .MaD .Dash img{
+            height: 100%;
+            width: 100%;
+        }
+
+    .mapWhole .MenuBar {
+        display: none;
+        position: absolute;
+        top: 120px;
+        height: 350px;
+        width: 250px;
+        background: linear-gradient(to bottom, #04598F, #737373);
+        z-index: 20;
+        cursor: pointer;
+        margin-top: -100px;
+        right: 10px;
+        
+    }
+
+    .mapWhole .MenuBar .Return{
+        height: 15%;
+        width: 100%;
+        font-size: 8vh;
+        font-weight: 800;
+        color: white;
+        padding-left: 5px;
+    }
+
+    .mapWhole .MenuBar .BarSlot {
+        height: 20%;
+        width: 100%;
+        background-color: rgba(134, 133, 133, 0.4);
+        color: white;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-weight: 500;
+        text-decoration: none;
+        margin: 5px 0px;
+    }
+
+    .mapWhole .Mapp{
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100%;
+        width: 100%;
+        background-color: #f0f0f0;
+        z-index: 1;
+    }
+
+    .leaflet-touch .leaflet-bar a {
+        width: 30px;
+        height: 30px;
+        line-height: 30px;
+        display: none;
+    }
+
+    .leaflet-container .leaflet-control-attribution {
+        background: #fff;
+        background: rgba(255, 255, 255, 0.8);
+        margin: 0;
+        display: none;
+    }
+
+.MaV2{
+    height: 100%;
+    width: 35%;
+    background:linear-gradient(to bottom, #04598F, #737373);
+    display: flex;
+    flex-direction: column;
+    z-index: 100;
+    align-items: center;
+}
+    .MaV2 .Message{
+        height: 70%;
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        overflow-y: auto;
+    }
+
+
+    .MaV2 .Message .double-text {
+        width: 70%;
+        position: relative;
+        font-size: 1.85vh;
+        font-weight: bold;
+        color: white;
+        text-align: center;
+        z-index: 3;
+    }
+    .MaV2 .Message .BackWord {
+        font-size: 8vh;
+        color: white;
+        opacity: 30%;
+        z-index: 2;
+        margin-bottom: -13%;
+    }
+
+
+    .Logo {
+        display: flex;
+        align-items: center;
+        flex-direction: row-reverse;
+        justify-content: space-between;
+        position: absolute;
+        z-index: 9999;
+        align-self: flex-end;
+        
+    }   
+
+        .Logo .Big{
+            font-weight: 700;
+            color: black;
+            font-size: 3vh;
+            height: 50%;
+            width: 80%;
+            text-align: center;
+            background-color: #ccc;
+            padding: 10px 5px;
+            border-radius: 50px;
+            border: 3px black solid;    
+        }
+
+        .Logo .logo {
+            width: 100px;
+            height: 100px;
+        }
+
+        .myBuffer{
+            height: 20%;
+            width: 100%;
+        }
+
+
+        .legends{
+            height: 30%;
+            width: 80%;
+            background-color: #D9D9D9;
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+            flex-direction: column;
+        }
+
+        .legends .main{
+            display: flex;
+            flex-direction: column;
+            height: 80%;
+            width: 100%;
+        }
+        .legends .onee{
+            display: flex;
+            flex-direction: row;
+            height: 50%;
+            width: 100%;
+            
+        }
+            .legends .legendsIcon{
+                height: 50%;
+                width: 50%;
+                display: flex;
+                flex-direction: row;
+                align-items: center;
+                margin-left: 40px;
+            }
+        
+                .legends .legendsIcon img{
+                    height: 30px;
+                    width: 30px;
+                }
+        
+                .legends .legendsIcon .legendsName{
+                    height: 10%;
+                    padding: 5px 10px;
+                }
+
+
+
+.HomeButton{
+    display: flex;
+    position: absolute;
+    z-index: 1000;
+    justify-content: center;
+    height: 30px;
+    width: 60px;
+    background-color: #0F3976;
+    border-radius: 10px;
+    align-items: center;
+}
+.HomeButton a{
+    display: flex;
+    text-align: center;
+    text-decoration: none;
+    color: white;
+
+}
+
+
+.Info{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+.Info h3{
+    color: white;
+}
+
+.InformationOP{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+.InformationOP h3{
+    color: white;
+}
+
+.operations{
+    height: 30%;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    margin-bottom: 10px;
+}
+.operations button{
+    background-color: #0F3976;
+    color: white;
+    border-radius: 10px;
+    font-weight: 700;
+    padding: 10px;
+    display: flex;
+    align-items: center;
+}
+.Residents{
+    height: 70%;
+    width: 100%;
+}
+
+.leaflet-popup-content {
+    margin: 13px 24px 13px 20px;
+    line-height: 1.3;
+    font-size: 13px;
+    font-size: 1.08333em;
+    min-height: 1px;
+    text-align: center;
+}
+
+.newHouseHold{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+.newHouseHold label{
+    color: #ccc;
+    margin-bottom: 10px;
+}
+.newHouseHold input{
+    padding: 10px 5px;
+    margin-bottom: 10px;
+}
+.newHouseHold button{
+    padding: 10px 5px;
+    background-color: #0F3976;
+    border-radius: 10px;
+    text-align: center;
+    color: white;
+    margin-bottom: 10px;
+}
+
+.newBusiness{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+.newBusiness label{
+    color: #ccc;
+    margin-bottom: 10px;
+}
+.newBusiness input{
+    padding: 10px 5px;
+    margin-bottom: 10px;
+}
+.newBusiness button{
+    padding: 10px 5px;
+    background-color: #0F3976;
+    border-radius: 10px;
+    text-align: center;
+    color: white;
+    margin-bottom: 10px;
+    margin-top: 10px;
+}
+
+.newSchool{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+.newSchool label{
+    color: #ccc;
+    margin-bottom: 10px;
+}
+.newSchool input{
+    padding: 10px 5px;
+    margin-bottom: 10px;
+}
+.newSchool button{
+    padding: 10px 5px;
+    background-color: #0F3976;
+    border-radius: 10px;
+    text-align: center;
+    color: white;
+    margin-bottom: 10px;
+    margin-top: 10px;
+}
+
+.newChurch{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+.newChurch label{
+    color: #ccc;
+    margin-bottom: 10px;
+}
+.newChurch input{
+    padding: 10px 5px;
+    margin-bottom: 10px;
+}
+.newChurch button{
+    padding: 10px 5px;
+    background-color: #0F3976;
+    border-radius: 10px;
+    text-align: center;
+    color: white;
+    margin-bottom: 10px;
+    margin-top: 10px;
+}
+
+
+
+/* Custom Alert Modal Styling */
+.custom-alert {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.alert-content {
+    background-color: #fff;
+    padding: 20px;
+    width: 300px;
+    border-radius: 8px;
+    text-align: center;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.alert-content p {
+    margin: 0 0 15px;
+    font-size: 16px;
+    color: #333;
+}
+
+.alert-content button {
+    padding: 8px 16px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.alert-content button:hover {
+    background-color: #0056b3;
+}
+
+ 
+.custom-confirm {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.confirm-content {
+    background-color: #fff;
+    padding: 20px;
+    width: 300px;
+    border-radius: 8px;
+    text-align: center;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.confirm-content p {
+    margin: 0 0 15px;
+    font-size: 16px;
+    color: #333;
+}
+
+.confirm-content button {
+    padding: 8px 16px;
+    margin: 5px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.confirm-content button:hover {
+    background-color: #0056b3;
+}
+
+.custom-popup{
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+}
+    .custom-popup .popup-content{
+        background-color: #fff;
+        padding: 20px;
+        width: 300px;
+        border-radius: 8px;
+        text-align: center;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        position: fixed;
+        top: 33%;
+        left: 38%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    
+    }
+        .custom-popup .popup-content button{
+            padding: 8px 16px;
+            margin: 5px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+            .custom-popup .popup-content button:hover{
+                background-color: #0056b3;
+            }
+
+.modal {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+    overflow-y: scroll;
+}
+
+.modal-content {
+    background-color: #0F3976;
+    padding: 20px;
+    width: 300px;
+    border-radius: 8px;
+    text-align: center;
+    color: white;
+}
+
+.close {
+    cursor: pointer;
+    float: right;
+    font-size: 1.5em;
+}
+
+#resident-list {
+    max-height: 200px;
+    overflow-y: auto;
+    margin-top: 10px;
+}
+
+.resident-item {
+    background-color: #04598F;
+    cursor: pointer;
+    padding: 10px;
+    border-radius: 10px;
+    width: 280px;
+    margin-top: 10px;
+}
+
+.resident-item:hover {
+    background-color: #2E9EC9;
+}
+
+.residentInfoInside{
+    display: flex;
+    flex-direction: column;
+    color: white;
+    padding: 0%;
+    font-size: smaller;
+}
+.residentInfoInside .one{
+    display: flex;
+    flex-direction: column;
+    justify-content: space-evenly;
+}
+    .residentInfoInside .one .topShelf{
+        display: flex;
+        flex-direction: row;
+        margin-bottom: 3px;
+        
+    }
+    .residentInfoInside .one .bottomShelf{
+        display: flex;
+        flex-direction: row;
+        margin-bottom: 3px;
+        
+    }
+.residentInfoInside .two{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+}
+
+.removeFromHouseButton {
+    padding: 5px;
+    border-radius: 3px;
+    border: #0F3976;
+}
+
+textarea {
+    width: 100%;
+    height: 100px;
+}
+
+#add-business-form label {
+    display: block;
+    margin: 5px 0;
+}
+
+/* Style for the floating button */
+.floating-btn {
+    top: 20px;
+    right: 200px;
+    background-color: #f5f5f5;
+    border: none;
+    border-radius: 50%;
+    padding: 15px;
+    font-size: 24px;
+    cursor: pointer;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    z-index: 9900;
+    position: absolute;
+    margin: 0%;
+  }
+  
+  /* Style for the hidden container */
+  .search-container {
+    bottom: -130px;
+    right: 0;
+    width: 32%;
+    height: 100%;
+    border-left: 2px solid #ddd;
+    padding: 20px;
+    display: none;
+    box-shadow: -4px 0 8px rgba(0, 0, 0, 0.2);
+    position: absolute;
+    z-index: 9900;
+    background: linear-gradient(to bottom, #0F3976, #0056b3, #007bff);
+  }
+  
+  /* Style for the search bar */
+  #search-bar {
+    width: 95%;
+    padding: 10px;
+    margin-bottom: 20px;
+    border-radius: 5px;
+    border: 1px solid #ddd;
+  }
+  
+  /* Style for the resident list */
+  #resident-listing {
+    list-style-type: none;
+    padding: 0;
+    background-color: #ccc;
+  }
+  
+  #resident-listing li {
+    padding: 10px 5px;
+    cursor: pointer;
+    border-bottom: 1px solid #ddd;
+  }
+  
+  #resident-listing li:hover {
+    background-color: #f0f0f0;
+  }
+
+.modalBusiness {
+    display: flex;
+    z-index: 1;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background-color: #0a64ae;
+    margin: 5% auto;
+    padding: 10px;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    border: 7px white solid;
+    border-radius: 10px;
+    color: whitesmoke;
+    font-size: x-small;
+}
+
+    .modalBusiness-content form{
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+    .modalBusiness-content h2{
+        margin: 0px 0px 10px 0px;
+        text-align: center;
+    }
+    .modalBusiness-content input[type="text"] {
+        padding: 3px 10px;
+        margin-top: 3px;
+        margin-bottom: 3px;
+    }
+    .modalBusiness-content input[type="date"]{
+        padding: 3px 10px;
+        width: 87%;
+        margin-top: 3px;
+        margin-bottom: 3px;
+    }
+    .modalBusiness-content Button{
+        align-self: center;
+        padding: 5px 10px;
+        background-color: #0F3976;
+        border-radius: 10px;
+        color: white;
+        border: white 3px solid;
+    }
+
+    .modalBusiness-content Button:hover{
+        background-color: white;
+        color: #0F3976;
+        border-color: #0F3976 3px solid;
+    }
+    .modalBusiness-content Button:active{
+        background-color: #0F3976;
+        color: white;
+        border-color: white 3px solid;
+    }
+
+#showBusinessData{
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
+    color: white;
+    font-size: 3vh;
+    background-color: #007bff;
+    border: white 3px solid;
+    margin-top: 20px;
+    padding: 10px 20px;
+    height: 80%;
+    width: 60%;
+}
+
+.NameOfBusiness{
+    color: white;
+    align-self: center;
+}
+  

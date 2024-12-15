@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="_csrf" content="${_csrf.token}">
+    <meta name="_csrf_header" content="${_csrf.headerName}">
+    <link rel="icon" href="/favicon.png" type="image/png">
+    <link rel="stylesheet" th:href="@{/css/BusinessRecords.css}">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <script>
+        // Prevent caching
+        if (window.performance && window.performance.navigation.type === window.performance.navigation.TYPE_BACK_FORWARD) {
+            location.replace('/login?expired');
+        }
+
+        // Session check on load
+        document.addEventListener('DOMContentLoaded', checkSession);
+        
+        // Check on visibility change
+        document.addEventListener('visibilitychange', () => {
+            if (!document.hidden) checkSession();
+        });
+
+        function checkSession() {
+            fetch('/api/check-session', {
+                credentials: 'include',
+                headers: { 'Cache-Control': 'no-cache' }
+            })
+            .then(response => {
+                if (!response.ok) window.location.replace('/login?expired');
+            })
+            .catch(() => window.location.replace('/login?expired'));
+        }
+
+        // Prevent back button
+        window.addEventListener('popstate', () => {
+            checkSession();
+        });
+    </script>
+    <title>Barangay Wawa Portal</title>
+</head>
+<body>
+    <section class="top"> 
+        <input type="text" id="search" name="search" placeholder="Search for a business..." autocomplete="off">
+        <div class="button-group">
+            <button><a th:href="@{/Home}">Back to Home</a></button>
+            <button onclick="printBusinessRecords()" class="print-btn">Print Records</button>
+        </div>
+    </section>
+
+    <!-- Display list of businesses -->
+
+    <div class="table-container">
+        <div class="table-header">
+            <h2>Business Records</h2>
+        </div>
+        <table class="table" id="businessTable">
+            <thead>
+                <tr>
+                    <th>Business Name</th>
+                    <th>Owner</th>
+                    <th>Address</th>
+                    <th>Start Date</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody id="businessTableBody">
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Custom Delete Confirmation ModalBusiness -->
+    <div id="deleteModal" class="custom-popup" style="display: none;">
+        <div class="popup-content">
+            <h2>Are you sure you want to delete this business?</h2>
+            <button id="confirmDeleteBtn">Yes, Delete</button>
+            <button id="cancelDeleteBtn">Cancel</button>
+        </div>
+    </div>
+    
+    
+
+    <script>
+
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Page loaded, calling loadBusinesses');
+            loadBusinesses();
+        });
+        
+        // Dynamic search functionality: Filter businesses as user types
+        document.getElementById('search').addEventListener('input', function() {
+            const query = document.getElementById('search').value.trim(); // Trim whitespace
+        
+            if (query.length > 0) {
+                const encodedQuery = encodeURIComponent(query);
+                fetch(`/api/businesses/search?query=${encodedQuery}`)
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error(`Error: ${response.status}`);
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        console.log('Search results:', data); // Debug log
+                        displayBusinesses(data);
+                    })
+                    .catch(error => {
+                        console.error('Search error:', error);
+                        const businessContainer = document.getElementById("businessContainer");
+                        businessContainer.innerHTML = '<p>Error fetching search results.</p>';
+                    });
+            } else {
+                // If no query, fetch all businesses
+                fetch('/api/businesses/all')
+                    .then(response => response.json())
+                    .then(data => {
+                        console.log('All businesses:', data); // Debug log
+                        displayBusinesses(data);
+                    })
+                    .catch(error => {
+                        console.error('Error fetching all businesses:', error);
+                    });
+            }
+        });
+
+        // Function to display businesses in the table
+        // Function to display businesses in a table
+        function displayBusinesses(businesses) {
+            const businessContainer = document.getElementById("businessTableBody");
+            businessContainer.innerHTML = ''; // Clear the previous results
+
+            // Populate the table rows with business data
+            businesses.forEach(business => {
+                const businessRow = document.createElement("tr");
+                businessRow.dataset.id = business.id; // Store the business ID as a data attribute
+
+                businessRow.innerHTML = `
+                    <td>${business.name}</td>
+                    <td>${business.owner}</td>
+                    <td>${business.address}</td>
+                    <td>${business.startDate}</td>
+                    <td>
+                        <button class="delete-btn" data-id="${business.id}">Delete</button>
+                    </td>
+                `;
+                businessContainer.appendChild(businessRow);
+
+                // Add delete functionality to the delete button
+                businessRow.querySelector('.delete-btn').addEventListener('click', function() {
+                    const businessId = this.dataset.id;
+
+                    // Show the custom delete modal
+                    const deleteModal = document.getElementById("deleteModal");
+                    const confirmDeleteBtn = document.getElementById("confirmDeleteBtn");
+                    const cancelDeleteBtn = document.getElementById("cancelDeleteBtn");
+
+                    // Store the business ID to be deleted
+                    deleteModal.dataset.businessId = businessId;
+
+                    // Show the modal
+                    deleteModal.style.display = "block";
+
+                    // Confirm Delete
+                    confirmDeleteBtn.onclick = function() {
+                        fetch(`/api/businesses/delete/${businessId}`, {
+                            method: 'DELETE',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRF-TOKEN': document.querySelector('meta[name="_csrf"]').getAttribute('content') // CSRF token for security
+                            }
+                        })
+                        .then(response => {
+                            if (response.ok) {
+                                // Remove the deleted business row from the table
+                                businessContainer.removeChild(businessRow);
+                            } else {
+                                alert('Error deleting business');
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error deleting business:', error);
+                        });
+
+                        // Close the modal
+                        deleteModal.style.display = "none";
+                    };
+
+                    // Cancel Delete
+                    cancelDeleteBtn.onclick = function() {
+                        deleteModal.style.display = "none"; // Close the modal without deleting
+                    };
+                });
+            });
+        }
+
+        // Fetch all businesses when the page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            fetch('/api/businesses/all') // Replace with the correct API endpoint
+                .then(response => response.json()) // Assuming the API returns a JSON array
+                .then(data => {
+                    displayBusinesses(data); // Display all businesses in the table
+                })
+                .catch(error => {
+                    console.error('Error fetching business data:', error);
+                });
+        });
+        
+
+        // Add a fallback for missing "businessContainer" element
+        const businessContainer = document.getElementById('businessContainer');
+        if (!businessContainer) {
+            console.warn('Element with ID "businessContainer" not found. Skipping initialization.');
+        }
+
+
+        
+
+
+        // Modal display logic for adding business
+        var modal = document.getElementById("addBusinessModal");
+        var btn = document.getElementById("addBusinessBtn");
+        var span = document.getElementsByClassName("close")[0];
+        
+// Update loadBusinesses function
+        function loadBusinesses() {
+            console.log('Fetching businesses...');
+            fetch('/api/businesses/all')
+                .then(response => {
+                    console.log('Response status:', response.status);
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(businesses => {
+                    console.log('Received businesses:', businesses);
+                    const tableBody = document.getElementById('businessTableBody');
+                    if (!tableBody) {
+                        console.error('Table body element not found!');
+                        return;
+                    }
+                    
+                    tableBody.innerHTML = '';
+                    
+                    if (!businesses || businesses.length === 0) {
+                        const row = document.createElement('tr');
+                        row.innerHTML = '<td colspan="5" style="text-align: center;">No businesses found</td>';
+                        tableBody.appendChild(row);
+                        return;
+                    }
+                    
+                    businesses.forEach(business => {
+                        console.log('Processing business:', business);
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                            <td>${business.name || 'N/A'}</td>
+                            <td>${business.owner || 'N/A'}</td>
+                            <td>${business.address || 'N/A'}</td>
+                            <td>${business.startDate || 'N/A'}</td>
+                        `;
+                        tableBody.appendChild(row);
+                    });
+                })
+                .catch(error => {
+                    console.error('Error loading businesses:', error);
+                    const tableBody = document.getElementById('businessTableBody');
+                    tableBody.innerHTML = `
+                        <tr>
+                            <td colspan="5" style="text-align: center; color: red;">
+                                Error loading businesses: ${error.message}
+                            </td>
+                        </tr>
+                    `;
+                });
+        }
+    </script>
+    <style>
+        /* CSS For printing */
+        @media print {
+            .top, 
+            .button-group,
+            button {
+                display: none;
+            }
+        
+            .table-container {
+                width: 100%;
+                margin: 0;
+                padding: 0;
+            }
+        
+            table {
+                width: 100%;
+                border-collapse: collapse;
+            }
+        
+            th, td {
+                border: 1px solid black;
+                padding: 8px;
+                text-align: left;
+            }
+        
+            th {
+                background-color: #f2f2f2 !important;
+                color: black !important;
+            }
+        
+            @page {
+                margin: 2cm;
+            }
+        }
+
+    </style>
+    <script>
+        function printBusinessRecords() {
+            // Hide the action buttons before printing
+            const actionCells = document.querySelectorAll('td:last-child');
+            actionCells.forEach(cell => cell.style.display = 'none');
+            
+            // Hide the action column header
+            const actionHeader = document.querySelector('th:last-child');
+            if (actionHeader) actionHeader.style.display = 'none';
+
+            window.print();
+
+            // Restore the action buttons after printing
+            actionCells.forEach(cell => cell.style.display = '');
+            if (actionHeader) actionHeader.style.display = '';
+        }
+    </script>
+</body>
+</html>

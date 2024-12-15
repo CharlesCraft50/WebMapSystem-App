@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <title>Barangay Wawa Portal</title>
+    <link rel="stylesheet" th:href="@{/css/Home.css}">
+    <link rel="icon" href="/favicon.png" type="image/png">
+    <link rel="shortcut icon" th:href= "@{/image/Logo.png}" type="image/png">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" 
+    rel="stylesheet" 
+    integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" 
+    crossorigin="anonymous">
+    
+    <style>
+        .modal-content3{
+            position: absolute;
+            display: flex;
+            flex-direction: column;
+            width: 30%;
+            height: 50%;
+            color: var(--bs-modal-color);
+            pointer-events: auto;
+            background-color: var(--bs-modal-bg);
+            background-clip: padding-box;
+            border: var(--bs-modal-border-width) solid var(--bs-modal-border-color);
+            border-radius: var(--bs-modal-border-radius);
+            outline: 0;
+            top: 30%;
+            left: 30%;
+            align-items: center;
+            justify-content: center;
+        }
+         
+        #errorModal2 {
+            display: none;  
+            position: fixed;  
+            z-index: 1000;  
+            left: 0;
+            top: 0;
+            width: 100%; 
+            height: 100%; 
+            overflow: auto;  
+            background-color: rgba(0,0,0,0.4); 
+        }
+        .modal-content2 {
+            background-color: #fefefe;
+            margin: 15% auto;  
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%; 
+        }
+
+        .Regus{
+            background-color: rgb(217,217,217,0.75);
+            height: 100%;
+            width: 100%;
+            z-index: 999;
+            position:absolute;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        
+        }
+        
+        .Regus .Update{
+            background-color: #D9D9D9;
+            height: 41%;
+            width: 35%;
+            border-radius: 45px;
+            display: flex;
+            justify-content: center;
+            align-items: flex-end;
+            flex-direction: column;
+            color: #000000;
+        }
+            .Regus .Update .Mess{
+                height: 40%;
+                width: 100%;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                font-size: 4vh;
+                font-weight: 700;
+            }
+            .Regus .Update .MessReg{
+                height: 40%;
+                width: 100%;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                font-size: 4vh;
+                font-weight: 700;
+            }
+            .Regus .Update .Styler{
+                height: 60%;
+                width: 100%;
+                display: flex;
+                justify-content: center;
+                align-items: flex-start;
+            }
+                .Regus .Update .Styler .ReturnLogin{
+                    background-color: #0F3976;
+                    height: 47%;
+                    width: 35%;
+                    border-radius: 50px;
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    font-size: 4vh;
+                    color: white;
+                    text-decoration: none;
+                }
+    </style>
+</head>
+<body>
+
+    <!-- Error Modal -->
+    <div id="errorModal2" role="dialog" aria-labelledby="errorTitle" aria-describedby="modalErrorMessage">
+        <div class="modal-content2">
+            <h2 id="errorTitle">Error</h2>
+            <p id="modalErrorMessage"></p>
+            <button onclick="closeModal()">Close</button>
+        </div>
+    </div>
+    <div th:if="${param.success}" class="Regus">
+        <div class="Update">
+            <div class="Mess">REGISTRATION SUCCESSFUL</div>
+            <div class="Styler">
+                <a th:href="@{/}" class="ReturnLogin">OK</a>
+            </div>
+        </div>
+    </div>
+    <div th:if="${param.error}" class="Regus">
+        <div class="Update">
+            <div class="Mess">Invalid OTP / OTP EXPIRED</div>
+            <div class="Styler">
+                <a th:href="@{/}" class="ReturnLogin">OK</a>
+            </div>
+        </div>
+    </div>
+    
+
+    <!--Register-->
+    <!-- Register Form -->
+    <section class="RegisterSection" >
+        <div class="Hello" style="color:aliceblue">
+            <p><b>Barangay Wawa, Balagtas, Bulacan</b></p>
+            <p style="font-size: x-small; margin-top: -15px; margin-left:15%">Register your account</p>
+        </div>
+        <div th:if="${error}" class="alert alert-danger" style="width: 90%; align-self: center; font-size: 2.5vh; height: auto;">
+            <p th:text="${error}" style="padding: 10px; margin: 0;"></p>
+        </div>
+        
+        <div class="Whole" style="justify-content: center;">
+            <div class="Register">
+                <form id="registrationForm" th:action="@{/Register}" method="post" th:object="${user}" onsubmit="return handleRegistration(event)">
+                    <div class="form-group">
+                        <label for="first-name">First Name</label>
+                        <input type="text" id="first-name" name="firstName" th:field="*{firstName}" required placeholder="First Name" />
+                    </div>
+                    <div class="form-group">
+                        <label for="last-name">Last Name</label>
+                        <input type="text" id="last-name" name="lastName" th:field="*{lastName}" required placeholder="Last Name" />
+                    </div>
+                    <div class="form-group">
+                        <label for="email">Email</label>
+                        <input type="email" id="email" name="email" th:field="*{email}" required placeholder="Email" />
+                    </div>
+                    <div class="form-group">
+                        <label for="password">Password</label>
+                        <input type="password" id="password" name="password" th:field="*{password}" required placeholder="Password" />
+                    </div>
+                    <div class="form-group">
+                        <label for="confirm-password">Confirm Password</label>
+                        <input type="password" id="confirm-password" name="confirmPassword" required placeholder="Confirm Password" />
+                    </div>
+                    <button type="submit" class="register-btn">Register</button>
+                    <a th:href= "@{/login}" style="color: white; text-decoration: none; font-size: 1.5vh; flex-direction: column; align-items: center; display: flex;">Already Have An Account?, Log In</a>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <!-- OTP Verification Section -->   
+    <section class="OtpVerificationSection" th:if="${otpRequired != null && otpRequired}">
+        <div class="Hello" style="color:black">
+            <p><b>Enter OTP</b></p>
+            <p style="font-size: x-small; margin-top: -15px; margin-left:15%">We've sent an OTP to your email. Please enter it below to complete your registration.</p>
+        </div>
+        <div class="Whole" style="justify-content: center;">
+            <div class="OtpVerification">
+                <form id="otpForm" th:action="@{/Register/verify-otp}" method="post">
+                    <div class="form-group">
+                        <input type="hidden" id="email" name="email" th:value="*{email}"  />
+                    </div>
+                    <div class="form-group">
+                        <label for="otp">OTP</label>
+                        <input type="text" style="margin-bottom: 5px;" id="otp" name="otp" required placeholder="Enter OTP" />
+                    </div>
+                    <button type="submit" class="verify-otp-btn">Verify OTP</button>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <!--Image-->
+    <section class="BackImage">
+        <div class="Mid"><b>Barangay Mapping System for Barangay Wawa, Balagtas, Bulacan</b></div>
+    </section>
+
+    <!--Mission & Vision-->
+    <section class="MaV">
+        <div class="up">
+            <div class="BackWord">
+                <b>Mission</b>
+            </div>
+            <div class="double-text">
+                <b>Our mission is to empower the community of Barangay Wawa through the development and implementation of an innovative Barangay Mapping System. We aim to utilize technology to help local leaders manage things more efficiently, while also getting everyone in the community more involved.</b>
+            </div>
+            <div class="BackWord">
+                <b>Vision</b>
+            </div>
+            <div class="double-text">
+                <b>We imagine a future for Barangay Wawa where everyone can easily use a modern mapping system. This system will provide accurate information that helps residents and local leaders make smart choices, support community growth, and build a strong, thriving neighborhood.</b>
+            </div>
+        </div>
+        <div class="down">
+            <img th:src="@{/image/Logo.png}" class="logo" alt="Logo">
+        </div>
+    </section>
+
+    <script>
+        document.querySelector('form').addEventListener('submit', function(event) {
+            if (!validatePasswords()) {
+                event.preventDefault();
+            }
+        });
+    
+        function validatePasswords() {
+            const password = document.getElementById("password").value;
+            const confirmPassword = document.getElementById("confirm-password").value;
+        
+            if (password.length < 8) {
+                showModal("Password must be at least 8 characters long.");
+                return false;
+            }
+            if (!/[A-Z]/.test(password)) {
+                showModal("Password must include at least one uppercase letter.");
+                return false;
+            }
+            if (!/[a-z]/.test(password)) {
+                showModal("Password must include at least one lowercase letter.");
+                return false;
+            }
+            if (!/\d/.test(password)) {
+                showModal("Password must include at least one number.");
+                return false;
+            }
+            if (password !== confirmPassword) {
+                showModal("Passwords do not match. Please try again.");
+                return false;
+            }
+            return true;
+        }
+    
+        function showModal(message) {
+            document.getElementById("modalErrorMessage").innerText = message;
+            document.getElementById("errorModal2").style.display = "block"; 
+        }
+    
+        function closeModal() {
+            document.getElementById("errorModal2").style.display = "none"; 
+        }
+    
+   
+        window.onclick = function(event) {
+            const modal = document.getElementById("errorModal2");  
+            if (event.target === modal) {
+                closeModal();
+            }
+        }
+
+    </script>
+    <script>
+        // Function to hide all modals and clear all inputs
+        function resetPageState() {
+            // Hide all modals
+            document.getElementById("errorModal2").style.display = "none";
+            
+            // Clear all inputs in forms
+            const inputs = document.querySelectorAll('input[type="text"], input[type="password"], input[type="email"]');
+            inputs.forEach(input => {
+                input.value = "";
+            });
+    
+            // Reset other elements like alerts if needed
+            const alerts = document.querySelectorAll('.alert');
+            alerts.forEach(alert => {
+                alert.style.display = "none";
+            });
+        }
+
+        // Attach resetPageState to the reload button's click event
+        document.getElementById('reloadButton').addEventListener('click', resetPageState);
+
+        // Close modal when clicking outside of it
+        window.onclick = function(event) {
+            const modal = document.getElementById("errorModal2");  
+            if (event.target === modal) {
+                closeModal();
+            }
+        }
+    </script>
+    
+</body>
+</html>

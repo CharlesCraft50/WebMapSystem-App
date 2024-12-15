@@ -1,0 +1,393 @@
+@font-face {
+    font-family: Inter;
+    src: url(../image/Inter-VariableFont_opsz\,wght.ttf);
+}
+
+body {
+    font-family: Inter, sans-serif;
+    margin: 0;
+    padding: 0;
+    height: 100vh;
+    width: 100%;
+    display: flex;
+    overflow: hidden;
+    background-color: #004aad;
+}
+
+.container {
+    display: flex;
+    flex-direction: row;
+    height: 100%;
+    width: 100%;
+}
+
+.form-section .LogoName{
+    display: flex;
+    flex-direction: row;
+    height: 10%;
+    width: 100%;
+}
+    .form-section .LogoName .Logo{
+        height: 100%;
+        width: 20%;
+    }
+        .form-section .LogoName .Logo img{
+            height: 70px;
+            width: 70px;
+        }
+    .form-section .LogoName .Name{
+        height: 100%;
+        width: 80%;
+    }
+
+.FormContainer{
+    display: flex;
+    flex-direction: row;
+}
+    .FormContainer .One{
+        height: 100%;
+        width: 50%;
+        font-size: 2vh;
+    }
+    .FormContainer .Two{
+        height: 100%;
+        width: 50%;
+        font-size: 2vh;
+    }
+
+/* Form Section */
+.form-section {
+    background-color: #004aad;
+    color: #fff;
+    padding: 20px;
+    width: 40%;
+    height: 100%;
+    border-right: white 5px solid;
+}
+
+.form-section h1 {
+    text-align: center;
+    margin-bottom: 20px;
+    font-size: 24px;
+}
+
+.form-section label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+}
+
+.form-section input {
+    width: 90%;
+    padding: 5px;
+    margin-bottom: 15px;
+    border: none;
+    border-radius: 4px;
+    background-color: lightgray;
+}
+
+.form-section textarea {
+    width: 85%;
+    padding: 10px;
+    margin-bottom: 15px;
+    border: none;
+    height: 100px;
+    border-radius: 4px;
+    background-color: lightgray;
+}    
+
+.form-section select {
+    width: 95%;
+    padding: 5px;
+    margin-bottom: 15px;
+    border: none;
+    border-radius: 4px;
+    background-color: lightgray;
+}
+
+.form-section button{
+    width: 47%;
+    padding: 10px;
+    margin-bottom: 15px;
+    border: none;
+    border-radius: 4px;
+    align-self: center;
+    background-color: lightgray;
+}
+textarea {
+    resize: none;
+}
+
+button {
+    background-color: #fff;
+    color: #004aad;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: #ddd;
+}
+
+/* Records Section */
+.records-section{
+    color: white;
+    padding-left: 20px;
+}
+
+.records-section table {
+    display: block; /* Ensures the table becomes scrollable */
+    max-height: 70vh; /* Adjust this value to set the table's height limit */
+    overflow-y: auto; /* Enables vertical scrolling */
+    width: 100%; /* Ensures the table takes full width */
+    border-collapse: collapse; /* Optional: for cleaner table appearance */
+    overflow-x: hidden;
+    
+
+}
+
+.records-section th, 
+.records-section td {
+    padding: 10px;
+    text-align: left;
+}
+
+thead {
+    position: sticky; /* Keeps the table header fixed */
+    top: 0; /* Ensures the header stays at the top of the scrollable table */
+    background-color: #f1f1f1; /* Optional: Background for header visibility */
+    z-index: 1; /* Ensures the header stays on top of table content */
+}
+
+
+
+.records-section h1 {
+    text-align: center;
+    margin-bottom: 20px;
+    font-size: 24px;
+}
+
+.filter {
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+}
+
+.filter label {
+    margin-right: 10px;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: #fff;
+    color: #333;
+    border-radius: 8px;
+    overflow: scroll;
+
+
+}
+
+thead {
+    background-color: #003580;
+    color: #fff;
+}
+
+th, td {
+    padding: 10px;
+    text-align: center;
+}
+
+th {
+    font-weight: bold;
+}
+
+tr .descriptionRow {
+    white-space: nowrap;      /* Prevent the text from wrapping */
+    overflow: hidden;         /* Hide text overflow */
+    text-overflow: ellipsis;  /* Add ellipsis (...) */
+    max-width: 150px;         /* Limit the width of the column */
+}
+
+tr:nth-child(even) {
+    background-color: #f0f4f8;
+}
+
+.view-btn,
+.delete-btn {
+    padding: 5px 10px;
+    border: none;
+    border-radius: 4px;
+    font-size: 14px;
+    cursor: pointer;
+    margin: 0 5px;
+}
+
+.buttonBoth{
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+}
+
+.view-btn {
+    background-color: #00b300;
+    color: #fff;
+}
+
+.delete-btn {
+    background-color: #ff4d4d;
+    color: #fff;
+}
+
+.view-btn:hover {
+    background-color: #008000;
+}
+
+.delete-btn:hover {
+    background-color: #cc0000;
+}
+
+.search-bar{
+    margin-bottom: 10px;
+}
+.search-bar input{
+    width: 40%;
+    padding: 5px 10px;
+    margin-bottom: 15px;
+    border: none;
+    border-radius: 4px;
+    background-color: lightgray;
+}
+
+.modal {
+    display: none; /* Hidden by default */
+    position: fixed;
+    z-index: 1000;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 40%;
+    background: #004aad;
+    border: 1px solid black;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    padding: 20px;
+    border-radius: 10px;
+    flex-direction: column;
+    color: white;
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.modal-header h2 {
+    margin: 0;
+}
+
+.close-btn {
+    background-color: red;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    cursor: pointer;
+    width: 30px;
+    height: 30px;
+    text-align: center;
+}
+
+.overlay {
+    display: none;
+    position: fixed;
+    z-index: 999;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+}
+
+/* Overlay to cover the screen */
+#deleteOverlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+}
+
+/* Delete Modal */
+.delete-modal {
+    display: none;
+    position: fixed;
+    top: 30%;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    z-index: 1001;
+    width: 300px;
+}
+
+.delete-modal-header {
+    font-size: 18px;
+    font-weight: bold;
+    text-align: center;
+}
+
+.delete-modal-body {
+    text-align: center;
+    margin: 10px 0;
+}
+
+.delete-modal-footer {
+    display: flex;
+    justify-content: space-between;
+}
+
+.cancel-btn, .confirm-btn {
+    padding: 10px 20px;
+    border: none;
+    cursor: pointer;
+}
+
+.cancel-btn {
+    background-color: #ccc;
+}
+
+.confirm-btn {
+    background-color: #e74c3c;
+    color: white;
+}
+
+.cancel-btn:hover, .confirm-btn:hover {
+    opacity: 0.8;
+}
+
+/* Update the datetime input styles to match other fields */
+input[type="datetime-local"] {
+    width: 90%;  /* Match other input widths */
+    padding: 5px;  /* Match other input padding */
+    margin-bottom: 15px;
+    border: none;
+    border-radius: 4px;
+    background-color: lightgray;  /* Match other input backgrounds */
+    color: #333;
+    font-size: 2vh;  /* Match other input font sizes */
+}
+
+input[type="datetime-local"]:focus {
+    outline: none;
+}
+
+/* Override browser's default styling */
+input[type="datetime-local"]::-webkit-calendar-picker-indicator {
+    filter: invert(0.5);  /* Make the calendar icon slightly darker */
+    cursor: pointer;
+}

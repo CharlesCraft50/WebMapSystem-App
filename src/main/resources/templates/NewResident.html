@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="/favicon.png" type="image/png">
+    <link rel="stylesheet" th:href="@{/css/NewResident.css}">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <script>
+        // Prevent caching
+        if (window.performance && window.performance.navigation.type === window.performance.navigation.TYPE_BACK_FORWARD) {
+            location.replace('/login?expired');
+        }
+
+        // Session check on load
+        document.addEventListener('DOMContentLoaded', checkSession);
+        
+        // Check on visibility change
+        document.addEventListener('visibilitychange', () => {
+            if (!document.hidden) checkSession();
+        });
+
+        function checkSession() {
+            fetch('/api/check-session', {
+                credentials: 'include',
+                headers: { 'Cache-Control': 'no-cache' }
+            })
+            .then(response => {
+                if (!response.ok) window.location.replace('/login?expired');
+            })
+            .catch(() => window.location.replace('/login?expired'));
+        }
+
+        // Prevent back button
+        window.addEventListener('popstate', () => {
+            checkSession();
+        });
+    </script>
+    <title>Barangay Wawa Portal</title>
+    <script>
+        function previewPhoto() {
+            const file = document.getElementById('photoInput').files[0];
+            const preview = document.getElementById('photoPreview');
+        
+            const reader = new FileReader();
+            reader.onloadend = function() {
+                preview.src = reader.result;
+                preview.style.display = 'block';
+            }
+        
+            if (file) {
+                reader.readAsDataURL(file);
+            } else {
+                preview.src = "";
+                preview.style.display = 'none';
+            }
+        }
+
+        function calculateAge(birthDate) {
+            const today = new Date();
+            const birth = new Date(birthDate);
+            let age = today.getFullYear() - birth.getFullYear();
+            const month = today.getMonth();
+            const day = today.getDate();
+
+            if (month < birth.getMonth() || (month === birth.getMonth() && day < birth.getDate())) {
+                age--;  
+            }
+
+            return age;
+        }
+ 
+        function handleFormSubmit(event) {
+            const birthDate = document.getElementById('birthDate').value;
+            const age = calculateAge(birthDate); 
+            document.getElementById('age').value = age; 
+            return true;
+        }   
+
+        function toggleTemporaryAddress(checkbox) {
+            const tempAddressField = document.getElementById('temporaryAddress');
+            if (checkbox.checked) {
+                tempAddressField.value = '';  
+                tempAddressField.disabled = true; 
+            } else {
+                tempAddressField.disabled = false;  
+            }
+        }
+    </script>
+</head>
+<body>
+    <form th:action="@{/NewResident}" th:object="${residentDTO}" method="post" enctype="multipart/form-data" class="formMan" onsubmit="return handleFormSubmit(event)">
+        <input type="hidden" th:field="*{id}" />
+        <input type="hidden" id="age" th:field="*{age}" />
+
+        <section class="left">
+            <div class="photo-section">
+                <img th:src="@{/image/Logo.png}" alt="Logo">
+                <h3>Resident Information</h3>
+                <label class="upload-box" for="photoInput">
+                    + Add Image
+                    <img id="photoPreview" class="previewID" src="@{/image/Logo.png}" alt="Resident" style="display: none;"/>
+                </label>
+                <input style="display: none;" type="file" id="photoInput" th:field="*{photoInput}" accept="image/*" class="hidden" onchange="previewPhoto()">
+                <br><br>
+                <button type="submit">SAVE</button>
+                <a class="back-button" th:href="@{/Home}">BACK</a>
+                <a class="back-button" th:href= "@{/Records}">RECORDS</a>
+            </div>
+        </section>
+
+        <section class="right">
+            <div class="form-wrapper">
+                <div class="form-section">
+                    <div class="one">
+                        <label for="firstName">First Name</label>
+                        <input type="text" id="firstName" th:field="*{firstName}" placeholder="Enter First Name" required>
+
+                        <label for="middleName">Middle Name</label>
+                        <input type="text" id="middleName" th:field="*{middleName}" placeholder="Enter Middle Name">
+                        
+                        <label for="lastName">Last Name</label>
+                        <input type="text" id="lastName" th:field="*{lastName}" placeholder="Enter Last Name" required>
+
+                        <label for="suffix">Suffix</label>
+                        <select id="suffix" th:field="*{suffix}">
+                            <option value="">None</option>
+                            <option value="Jr.">Jr.</option>
+                            <option value="Sr.">Sr.</option>
+                        </select>
+
+                        <label for="birthDate">Birth Date</label>
+                        <input type="date" id="birthDate" th:field="*{birthDate}" placeholder="Enter Birth Date" required min="1900-01-01" value="2000-01-01">
+
+                        <label for="permanentAddress">Permanent Address</label>
+                        <input type="text" id="permanentAddress" th:field="*{permanentAddress}" placeholder="Enter Permanent Address">
+                        
+                        <label for="temporaryAddress">Temporary Address</label>
+                        <input type="text" id="temporaryAddress" th:field="*{temporaryAddress}" placeholder="Enter Temporary Address">
+
+                        <div style="display: flex; flex-direction: row; font-size: 2.2vh;">
+                            <input type="checkbox" id="clearTemporaryAddress" onchange="toggleTemporaryAddress(this)">
+                            <label for="clearTemporaryAddress">No Temporary Address</label>
+                        </div>
+
+                    </div>
+
+                    <div class="two">
+                        <label for="gender">Gender</label>
+                        <select id="gender" th:field="*{gender}">
+                            <option value="Male">Male</option>
+                            <option value="Female">Female</option>
+                        </select>
+
+                        <label for="occupation">Occupation</label>
+                        <input type="text" id="occupation" th:field="*{occupation}" placeholder="Enter Occupation">
+
+                        <label for="mobileNo">Mobile No.</label>
+                        <input type="text" id="mobileNo" th:field="*{mobileNo}" placeholder="Enter Mobile No." >
+
+                        <label for="votingEligibility">Voting Eligibility:</label>
+                        <select id="votingEligibility" th:field="*{votingEligibility}">
+                            <option value="Non Registered">Non Registered</option>
+                            <option value="Registered">Registered</option>
+                            <option value="Unknown">Unknown</option>
+                        </select>
+
+                        <label for="birthPlace">Birth Place</label>
+                        <input type="text" id="birthPlace" th:field="*{birthPlace}" placeholder="Enter Birth Place">
+
+                        <label for="nationality">Nationality</label>
+                        <input type="text" id="nationality" th:field="*{nationality}" placeholder="Enter Nationality">
+
+                        <label for="civilStatus">Civil Status</label>
+                        <select id="civilStatus" th:field="*{civilStatus}">
+                            <option value="Single">Single</option>
+                            <option value="Married">Married</option>
+                            <option value="Widowed">Widowed</option>
+                        </select>
+
+                        <div style="display: flex; flex-direction: row; font-size: 2.2vh;">
+                            <input type="checkbox" id="pwd" th:field="*{pwd}">
+                            <label for="pwd">Person With Disability</label>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </section>
+    </form>
+
+
+</body>
+</html>

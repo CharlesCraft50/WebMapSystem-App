@@ -1,0 +1,640 @@
+@font-face {
+    font-family: Inter;
+    src: url(../image/Inter-VariableFont_opsz\,wght.ttf);
+}
+
+html{
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+
+}
+
+body{
+    font-family: Inter, sans-serif;
+    height: 100%;
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    margin: 0%;
+    padding: 0%;
+}   
+
+/*Login*/
+
+.Login{
+    height: 100%;
+    width: 35%;
+    background-color: #0F3976;
+    display: flex;
+    flex-direction: column;
+    z-index: 100;
+}
+    .Login .Hello{
+        height: 40%;
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        
+    }
+        .Login .Hello p{
+            margin-bottom: -1vh;
+            margin-right: 10.5%;
+
+        }
+    .Login .MainLogin{
+        height: 60%;
+        width: 100%;
+        display: flex;
+        justify-content: flex-start;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .Login form{
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+    
+    .Login .input-group {
+        margin-bottom: 1rem;
+    }
+    
+    .Login label b{
+        font-size: 1.5vh;
+        color: aliceblue;
+        margin-bottom: 1.5vh;
+        margin-top: 1.5vh;
+    }
+    
+    .Login input[type="text"],
+    .Login input[type="email"],
+    .Login input[type="password"] {
+        width: 300px;
+        padding: 10px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        display: flex;
+        align-self: center;
+    }
+    
+    .Login .Button {
+        width: 40%;
+        padding: 10px;
+        background-color: #000000;
+        color: rgb(255, 255, 255);
+        border: white 1px solid;
+        border-radius: 4px;
+        cursor: pointer;
+        text-decoration: none;
+        display: flex;
+        justify-content: center;
+    }
+    
+    .Login .Button:hover {
+        background-color: white;
+        color: #000000;
+        border-color: #000000 1px solid;
+    }
+    
+    .forgot-pass {
+        text-align: center;
+        margin-top: 10px;
+        margin-bottom: 10px;
+        cursor: pointer;
+    }
+    
+    .forgot-pass a {
+        text-decoration: none;
+        color: #ffffff;
+        font-size: 2vh;
+    }
+    
+    .forgot-pass a:hover {
+        text-decoration: underline;
+
+    }
+
+    .SignUp {
+        text-decoration: none;
+        color: white;
+        font-size: xx-small;
+        margin-top: 1vh;
+    }
+
+/*Middle*/
+
+.BackImage{
+    height: 100%;
+    width: 30%;
+    background-image: url(../image/brgy.jpg);
+    background-size: cover;
+    background-position: 40%;
+    opacity: 80%;
+    display: flex;
+    justify-content: center;
+    align-items: flex-end;
+    z-index: 100;
+}
+
+    .BackImage .Mid{
+        position: relative;
+        width: 70%;
+        display: flex;
+        color: white;
+        top: -10%;
+        
+        
+    }
+
+/*Mission & Vision*/
+
+.MaV{
+    height: 100%;
+    width: 35%;
+    background:linear-gradient(to bottom, #04598F, #737373);
+    display: flex;
+    flex-direction: column;
+    z-index: 100;
+}
+    .MaV .up{
+        height: 55%;
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: space-evenly;
+    }
+
+    .MaV .up .double-text {
+        width: 70%;
+        position: relative;
+        font-size: 2vh;
+        font-weight: bold;
+        color: white;
+        text-align: center;
+        z-index: 3;
+    }
+    .MaV .up .BackWord {
+        font-size: 10vh;
+        color: white;
+        opacity: 30%;
+        z-index: 2;
+        margin-bottom: -13%;
+
+    }
+
+
+    .MaV .down {
+        height: 45%;
+        width: 100%;
+        background:linear-gradient(to bottom, #2E9EC9, #737373);
+        border-top-left-radius: 2rem;
+        border-top-right-radius: 1rem;
+        transform: skewY(18deg);
+        transform-origin: top left;
+        display: flex;
+        align-items: flex-end;
+        justify-content: flex-start;
+    }   
+
+        .MaV .down .logo {
+            width: 70%;
+            height: 70%;
+            transform: skewY(-18deg); 
+            object-fit: contain;
+            position: relative;
+            top: -14%;
+            left: -10%;
+        }
+
+
+/*-------------------------------------Register-------------------------------------------*/
+
+.RegisterSection{
+    height: 100%;
+    width: 35%;
+    background-color: #0F3976;
+    display: flex;
+    flex-direction: column;
+}
+
+    .RegisterSection .Whole{
+        display: flex;
+        flex-direction: row;
+        height: 70%;
+        width: 100%;
+    }
+
+    .RegisterSection .buffer{
+        height: 100%;
+        width: 15%;
+    }
+
+    .RegisterSection .Hello {
+        height: 15%;
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-end;
+        margin: 0%;
+        font-size: 15px;
+    }
+
+        .RegisterSection .Hello p b{
+            margin-left: 15%;
+        }
+
+    .RegisterSection .Register{
+        height: 70%;    
+        width: 70%;
+        color: white;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .RegisterSection .form-group {
+        margin-bottom: 15px;
+
+    }
+        .RegisterSection .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            font-size: x-small;
+        }
+        .RegisterSection .form-group input {
+            width: 100%;
+            padding: 7px;
+            font-size: 12px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        .RegisterSection .form-group input:focus {
+            outline: none;
+            border-color: black;
+        }
+        .RegisterSection .register-btn {
+            display: flex;
+            width: 40%;
+            padding: 9px;
+            font-size: 12px;
+            color: white;
+            background-color: black;
+            border: 1px solid white;
+            border-radius: 4px;
+            cursor: pointer;
+            justify-content: center;
+            margin-left: 30%;
+        }
+        .RegisterSection .register-btn:hover {
+            background-color: white;
+            color: #000000;
+            border-color: black 1px solid;
+        }
+        
+        .Whole .LogIn{
+            text-decoration: none;
+            color: white;
+            font-size: xx-small;
+            margin-top: 1vh;
+            display: flex;
+            margin-left: 27%;
+        }
+
+/*--------------------------------------------New-Password---------------------------------------------*/
+
+.Successful{
+    background-color: rgb(217,217,217,0.75);
+    height: 100%;
+    width: 100%;
+    z-index: 99;
+    position:absolute;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+}
+
+    .Successful .Update{
+        background-color: #D9D9D9;
+        height: 41%;
+        width: 35%;
+        border-radius: 45px;
+        display: flex;
+        justify-content: center;
+        align-items: flex-end;
+        flex-direction: column;
+        color: #000000;
+    }
+        .Successful .Update .Mess{
+            height: 40%;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 4vh;
+            font-weight: 700;
+        }
+        .Successful .Update .MessReg{
+            height: 40%;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 4vh;
+            font-weight: 700;
+        }
+        .Successful .Update .Styler{
+            height: 60%;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+        }
+            .Successful .Update .Styler .ReturnLogin{
+                background-color: #0F3976;
+                height: 47%;
+                width: 35%;
+                border-radius: 50px;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                font-size: 4vh;
+                color: white;
+                text-decoration: none;
+            }
+
+
+
+/*----------------------------------Home-----------------------------------*/
+
+.mapWhole{
+    width: 100%;
+    height: 100%;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+}
+    .mapWhole .MaD{
+        height: 200px;
+        width: 50px;
+        position: absolute;
+        z-index: 10;
+        margin-top: 30px;
+        margin-right: 15px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-evenly;
+        left: 0;
+    }
+
+    .mapWhole .MaD .Dash,
+    .mapWhole .MaD .Menu,
+    .mapWhole .MaD .MappingButton,
+    .mapWhole .MaD .Minus {
+        height: 25%;
+        width: 100%;
+        margin-top: 10px;
+        margin-left: 10px;
+    }
+
+    .mapWhole .MaD .Menu img,
+    .mapWhole .MaD .Minus img,
+    .mapWhole .MaD .Dash img,
+    .mapWhole .MaD .MappingButton img {
+        height: 100%;
+        width: 100%;
+    }
+
+    .mapWhole .MenuBar {
+        display: none;
+        position: absolute;
+        top: 120px;
+        height: 400px;
+        width: 250px;
+        background: linear-gradient(to bottom, #04598F, #737373);
+        z-index: 20;
+        cursor: pointer;
+        margin-top: -100px;
+        left: 10px;
+        border-radius: 15px;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .mapWhole .MenuBar .Return {
+        height: 15%;
+        width: 100%;
+        font-size: 8vh;
+        font-weight: 800;
+        color: white;
+        padding-left: 5px;
+    }
+
+    .mapWhole .MenuBar .BarSlot {
+        height: 13%;
+        width: 100%;
+        background-color: rgba(134, 133, 133, 0.4);
+        color: white;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-weight: 500;
+        text-decoration: none;
+        margin: 5px 0px;
+        transition: all 0.3s ease;
+        border-radius: 8px;
+    }
+
+    .mapWhole .MenuBar .BarSlot:hover {
+        background: rgba(255, 255, 255, 0.2);
+        transform: translateX(5px);
+    }
+
+    .mapWhole .Mapp{
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100%;
+        width: 100%;
+        background-color: #f0f0f0;
+        z-index: 1;
+    }
+
+    .leaflet-touch .leaflet-bar a {
+        width: 30px;
+        height: 30px;
+        line-height: 30px;
+        display: none;
+    }
+
+    .leaflet-container .leaflet-control-attribution {
+        background: #fff;
+        background: rgba(255, 255, 255, 0.8);
+        margin: 0;
+        display: none;
+    }
+
+.MaV2 {
+    position: absolute;
+    right: 0;
+    top: 0;
+    height: 100%;
+    width: 30%;
+    background: linear-gradient(to bottom, #04598F, #737373);
+    display: flex;
+    flex-direction: column;
+    z-index: 100;
+    transition: transform 0.5s ease-in-out;
+}
+
+.MaV2.slide-in {
+    transform: translateX(0); 
+}
+
+.MaV2.slide-out {
+    transform: translateX(100%); 
+}
+    
+    
+    .MaV2 .Message{
+        height: 50%;
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: space-around;
+    }
+
+
+    .MaV2 .Message .double-text {
+        width: 70%;
+        position: relative;
+        font-size: 1.85vh;
+        font-weight: bold;
+        color: white;
+        text-align: center;
+        z-index: 3;
+    }
+    .MaV2 .Message .BackWord {
+        font-size: 8vh;
+        color: white;
+        opacity: 30%;
+        z-index: 2;
+        margin-bottom: -13%;
+    }
+
+
+    .MaV2 .Logo {
+        height: 40%;
+        width: 100%;
+        display: flex;
+        align-items: center;
+        flex-direction: column;
+        justify-content: space-between;
+    }   
+
+        .MaV2 .Logo .Big{
+            font-weight: 700;
+            color: white;
+            font-size: 6vh;
+            height: 50%;
+            width: 100%;
+            text-align: center;
+        }
+
+        .MaV2 .Logo .logo {
+            width: 200px;
+            height: 200px;
+        }
+
+
+
+        .modal {
+            display: none; 
+            position: fixed; 
+            z-index: 1; 
+            left: 0;
+            top: 0;
+            width: 100%; 
+            height: 100%; 
+            overflow: auto; 
+            background-color: rgb(0,0,0); 
+            background-color: rgba(0,0,0,0.4); 
+        }
+        
+        .modal-content {
+            background-color: #fefefe;
+            margin: 15% auto; 
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%; 
+        }
+        
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+        
+        .close:hover,
+        .close:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+        
+.MappingButton{
+    height: 25%;
+    width: 100%;
+}
+
+.MappingButton img{
+    height: 100%;
+    width: 100%;
+}
+
+#map-container{
+    width: 100%;
+    height: 100%;
+    cursor: auto;
+}
+
+.OtpVerificationSection{
+    position: absolute;
+    z-index: 10000;
+    display: flex;
+    flex-direction: column;
+    height: 35%;
+    width: 30%;
+    background: aliceblue;
+    border: black 5px solid;
+    padding: 0;
+    border-radius: 15px;
+    top: 35%;
+    left: 35%;
+    align-items: center;
+    color: black;
+}
+
+    .OtpVerificationSection .Hello{
+        color: black;
+    }
+
+    .OtpVerificationSection .Whole{
+        display: flex;
+        align-content: center;
+    }
+
+    #otpForm{
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+

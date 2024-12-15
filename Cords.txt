@@ -1,0 +1,79 @@
+            var district1Coords = [
+                [14.826370406198757, 120.90498136413078],
+                [14.818685990176883, 120.91308950335046],
+                [14.818052700378397, 120.91279097921716],
+                [14.817877127113764, 120.91265476937068],
+                [14.817876609212279, 120.91266371261064],
+                [14.817694894038576, 120.91240301034186],
+                [14.817503743204911, 120.9119086947255],
+                [14.817466445461822, 120.91124317712413], 
+                [14.817473438789149, 120.91085254722768],
+                [14.81760864307428, 120.91029071531625],
+                [14.817657596328626, 120.90991937578505],
+                [14.817664589649768, 120.90949498774938],
+                [14.817643609685653, 120.90923939040974],
+                [14.81752705428568, 120.90895003491451],
+                [14.81716340105568, 120.9084846548527],
+                [14.81640721312281, 120.90772658663225],
+                [14.816004340459735, 120.9075305350192],
+                [14.815522449681932, 120.90740059946079],
+                [14.814740886418702, 120.90737296051745],
+                [14.813790091975733, 120.9074650903329],
+                [14.813629770256815, 120.90755491689858],
+                [14.813424914554437, 120.90778063493543],
+                [14.813340300186065, 120.90802477893449],
+                [14.813264544386794, 120.90869691963967],
+                [14.813194331211351, 120.90897774395629],
+                [14.813053904792191, 120.90916173230165],
+                [14.812780072989042, 120.90923435928644],
+                [14.812555390245098, 120.90916657410658],
+                [14.812295600531979, 120.90905037094109],
+                [14.812091981349887, 120.90886154079719],
+                [14.81194453285719, 120.90867028975397],
+                [14.811869638346286, 120.90845482971794],
+                [14.811792403354797, 120.90809653662437],
+                [14.811839212436146, 120.90743805200363],
+                [14.811991341905678, 120.90679651369416],
+                [14.813524224347153, 120.9036509443927],
+                [14.81381443821639, 120.90294162090333],
+                [14.81390571508546, 120.90241870664296],
+                [14.81392911940297, 120.90171664585145],
+                [14.820711763548452, 120.90327802607612],
+                [14.82550146519798, 120.90491986931347],
+                [14.826370406198757, 120.90498136413078]
+            ];
+        
+            L.polyline(district1Coords, { color: 'blue' }).addTo(map).bindPopup("Barangay Wawa");
+
+
+                @DeleteMapping("/{houseId}/remove-resident/{residentId}")
+    public ResponseEntity<HouseDTO> removeResidentFromHouse(@PathVariable Long houseId, @PathVariable Long residentId) {
+        return houseRepository.findById(houseId)
+                .map(existingHouse -> {
+                    // Find the resident to remove
+                    Resident residentToRemove = existingHouse.getResidents().stream()
+                            .filter(resident -> resident.getId().equals(residentId))
+                            .findFirst()
+                            .orElse(null);
+    
+                    if (residentToRemove != null) {
+                        // Remove the resident if found
+                        existingHouse.getResidents().remove(residentToRemove);
+                        houseRepository.save(existingHouse);
+    
+                        // Return updated HouseDTO
+                        return ResponseEntity.ok(new HouseDTO(
+                                existingHouse.getId(),
+                                existingHouse.getAddress(),
+                                existingHouse.getHouseNumber(),
+                                existingHouse.getName(),
+                                existingHouse.getLat(),
+                                existingHouse.getLng(),
+                                existingHouse.getResidentIds()));
+                    } else {
+                        // Simplified 404 response with HouseDTO type
+                        return ResponseEntity.notFound().build();
+                    }
+                })
+                .orElseGet(() -> ResponseEntity.notFound().build());
+    }

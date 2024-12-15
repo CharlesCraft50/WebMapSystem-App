@@ -1,0 +1,370 @@
+@font-face {
+    font-family: Inter;
+    src: url(../image/Inter-VariableFont_opsz\,wght.ttf);
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: Inter, sans-serif;
+    background-color: #f4f4f4;
+}
+
+.form-menu-container {
+    display: flex;
+    height: 100vh;
+}
+
+.menu {
+    width: 25%;
+    background: linear-gradient(to bottom, #04598F, #737373);
+    padding: 20px;
+    overflow-y: auto;
+}
+
+.menu button {
+    width: 100%;
+    padding: 15px;
+    margin-bottom: 10px;
+    background-color: #005b96;
+    color: white;
+    border: none;
+    font-size: 16px;
+    cursor: pointer;
+    border-radius: 5px;
+    text-align: center;
+}
+
+.menu button.active, .menu button:hover {
+    background-color: #0077b6;
+}
+
+/* Add to your CSS */
+.logo-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.logo-section .logo {
+    width: 100px;
+    height: auto;
+    margin-bottom: 10px;
+}
+
+.logo-section h2 {
+    color: white;
+    font-size: 1.5em;
+    margin-bottom: 5px;
+}
+
+.logo-section p {
+    color: white;
+    font-size: 1em;
+    opacity: 0.9;
+}
+
+.content {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    background:linear-gradient(to bottom, black, black, #696868b5);
+    padding: 20px;
+    position: relative;
+    z-index: 99;
+    overflow-y: scroll;
+    width: 70%;
+}
+
+.certificate-preview {
+    flex-grow: 1;
+    background-color: #f4f4f4;
+    border: 2px solid #ccc;
+    padding: 20px;
+    margin-bottom: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+}
+
+    .certificate-preview canvas{
+        height: auto;
+        width: 90%;
+        overflow-y: scroll;
+    }
+
+.certificate-preview h1 {
+    font-size: 24px;
+    color: #333;
+}
+
+.button-row {
+    display: flex;
+    position: relative;
+    z-index: 100;
+    width: 100%;
+    height: 50%;
+    flex-direction: column;
+    align-items: center;
+}
+
+.button-row button {
+    padding: 10px 20px;
+    font-size: 16px;
+    border: none;
+    cursor: pointer;
+    border-radius: 5px;
+}
+
+.button-row .back-btn {
+    background-color: #0077b6;
+    color: white;
+}
+
+.button-row .edit-btn {
+    background-color: white;
+    color: black;
+    border: 2px solid #ccc;
+    text-align: center;
+}
+
+.button-row .print-btn {
+    background-color: #0077b6;
+    color: white;
+    text-align: center;
+}
+.one{
+    width: 90%;
+    height: 20%;
+    flex-direction: column;
+    display: flex;
+    align-items: center;
+    
+}
+.two{
+    width: 90%;
+    height: 50%;
+    display: flex;
+    justify-content: space-around;
+    flex-direction: column;
+}
+
+.userMenu{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    color: white;
+    margin-bottom: 10px;
+}
+
+.pdf-container {
+    position: relative;
+    width: 100%;
+    height: 600px;
+    overflow: hidden;
+}
+.pdf-container canvas {
+    width: 100%;
+    height: auto;
+}
+.editable-field {
+    position: absolute;
+    padding: 5px;
+    background-color: transparent;
+    border: transparent;
+    text-align: center;
+
+}
+.edit-mode {
+    cursor: crosshair;  
+}
+
+@media print {
+    body * {
+        visibility: hidden;
+    }
+    .pdf-container, .pdf-container * {
+        visibility: visible;
+    }
+    .pdf-container {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: auto;
+    }
+    .editable-field {
+        position: absolute;
+        border: none; 
+        background: transparent;
+    }
+}
+
+@media print {
+    @page {
+        margin: 0;
+    }
+    body {
+        margin: 0;
+    }
+}
+
+/* Modal styles */
+#residentModal {
+    display: none;
+    position: fixed;
+    z-index: 1;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgb(0,0,0);
+    background-color: rgba(0,0,0,0.4);
+}
+.modal-content {
+    position: absolute;
+    background: linear-gradient(to bottom, #04598F, #737373);
+    margin: 15% auto;
+    padding: 20px;
+    border: 1px solid #888;
+    width: 30%;
+    color: white;
+    top: -15%;
+    left: 35%;
+}
+
+.modal-content input{
+    padding: 10px;
+    margin: 10px 0px;
+}
+
+.modal-header, .modal-body {
+    margin-bottom: 20px;
+}
+.resident-list {
+    max-height: 200px;
+    overflow-y: auto;
+    border: 1px solid #ddd;
+    padding: 10px;
+    background-color: white;
+    color: black;
+}
+.resident-item {
+    padding: 8px;
+    cursor: pointer;
+}
+.resident-item:hover {
+    background-color: #ddd;
+}
+
+.certificateFeedback{
+    position: absolute;
+    top: 45%;
+    left: 35%;
+    height: 25%;
+    width: 40%;
+    color: #0F3976;
+    z-index: 9000;
+    font-weight: 800;
+    background-color: whitesmoke;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+
+.certificate-counts-container {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: white;
+    padding: 20px;
+    border: 1px solid #ccc;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    z-index: 100;
+    display: none;
+}
+
+.certificate-counts-container h3 {
+    margin-top: 0;
+}
+
+.certificate-counts-container button {
+    margin-top: 10px;
+}
+
+.all-residents-container{
+    position: absolute;
+    z-index: 9900;
+    top: 5%;
+    left: 35%;
+    align-items: center;
+    flex-direction: column;
+    background: linear-gradient(to bottom, #04598F, #737373);
+    padding: 10px;
+    border-radius: 5px;
+    max-width: 500px;
+    max-height: 90%;
+}
+
+.all-residents-container h3{
+    color: white;
+    margin: 10px;
+}
+
+.all-residents-container #residentListContainer{
+    height: auto;
+    width: 90%;
+    overflow-y: scroll;
+    background-color: whitesmoke;
+    padding: 10px 5px;
+}
+
+.all-residents-container .resident-info{
+    margin: 4px 0px;
+}
+
+.all-residents-container button{
+    margin-top: 10px;
+    display: flex;
+    padding: 5px 10px;
+    border-radius: 8px;
+}
+
+/* Add to your existing CSS */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.4);
+}
+
+#residentSearch {
+    width: 100%;
+    padding: 8px;
+    margin: 10px 0;
+    border: 1px solid #ddd;
+}
+
+.modal-content input,
+.modal-content select {
+    width: 100%;
+    padding: 8px;
+    margin: 10px 0;
+}
+

@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="/favicon.png" type="image/png">
+    <meta name="_csrf" content="${_csrf.token}">
+    <meta name="_csrf_header" content="${_csrf.headerName}">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <script>
+        // Prevent caching
+        if (window.performance && window.performance.navigation.type === window.performance.navigation.TYPE_BACK_FORWARD) {
+            location.replace('/login?expired');
+        }
+
+        // Session check on load
+        document.addEventListener('DOMContentLoaded', checkSession);
+        
+        // Check on visibility change
+        document.addEventListener('visibilitychange', () => {
+            if (!document.hidden) checkSession();
+        });
+
+        function checkSession() {
+            fetch('/api/check-session', {
+                credentials: 'include',
+                headers: { 'Cache-Control': 'no-cache' }
+            })
+            .then(response => {
+                if (!response.ok) window.location.replace('/login?expired');
+            })
+            .catch(() => window.location.replace('/login?expired'));
+        }
+
+        // Prevent back button
+        window.addEventListener('popstate', () => {
+            checkSession();
+        });
+    </script>
+    <title>Barangay Wawa Portal</title>
+    <style>
+        @font-face {
+            font-family: Inter;
+            src: url(../image/Inter-VariableFont_opsz\,wght.ttf);
+        }
+        body {
+            font-family: Inter, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-color: #0F3976;
+            background-repeat: no-repeat;
+            background-size: cover;
+        }
+        
+        .search-bar {
+            margin-top: 20px;
+            margin-bottom: 20px;
+            width: 100%;
+            max-width: 600px;
+            display: flex;
+        }
+        
+        .search-bar input {
+            flex: 1;
+            padding: 10px;
+            font-size: 16px;
+        }
+        
+        .search-bar button {
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            background-color: rgb(2, 9, 50);
+            color: white;
+            border-radius: 10px;
+            border-width: 2px;
+            margin-left: 10px;
+        }
+        .search-bar a {
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            background-color: rgb(2, 9, 50);
+            color: white;
+            text-decoration: none;
+            border: 0ch;
+            border-radius: 10px;
+            border-width: 2px;
+            margin-left: 10px;
+            box-shadow: grey 2px solid;
+        }
+        
+        .cards-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            justify-content: center;
+            width: 100%;
+            max-width: 1200px;
+        }
+        
+        .card {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 15px;
+            width: 200px;
+            background-color: #f9f9f9;
+        }
+        
+        .card img {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-bottom: 10px;
+        }
+        
+        .card h4 {
+            margin: 0;
+            font-size: 18px;
+            text-align: center;
+        }
+        
+        .card p {
+            margin: 5px 0;
+            font-size: 14px;
+            text-align: center;
+        }
+        
+        .context-menu {
+            display: none;
+            position: absolute;
+            background-color: white;
+            border: black solid 2px;
+            z-index: 1000;
+            padding: auto;
+        
+        }
+        .context-menu-item {
+            padding: 10px 15px 10px;
+            cursor: pointer;
+        
+            border-radius: 3px;
+            text-align: center;
+        
+        }
+        .context-menu-item:hover {
+            background-color: #f0f0f0;
+        } 
+        .modal {
+            display: none; 
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(127, 127, 127, 0.1); 
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        } 
+        .modal-content {
+            background-color: white;
+            height: 47%;
+            width: 35%;
+            border-radius: 50px;
+            display: flex;
+            flex-direction: column;
+            font-size: 4vh;
+            color: black;
+            text-decoration: none;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            border: black 2px solid;
+        }
+        .DeleteButtons{
+            padding: 3px;
+            margin: 3px;
+            background-color: #0F3976;
+            border-radius: 3px;
+            color: White;
+        }
+        
+    </style>
+</head>
+<body>
+    <div id="errorModal" class="modal">
+        <div class="modal-content">
+            <p id="errorMessage">An error occurred.</p>
+            <button class="DeleteButtons" id="closeErrorModal">Close</button>
+        </div>
+    </div>
+    <!-- Search bar -->
+    <div class="search-bar">
+        <input type="text" id="searchInput" placeholder="Search resident by name or nationality...">
+        <button onclick="searchResidents()">Search</button>
+        <a th:href= "@{/Home}">Home</a>
+        <a th:href="@{/NewResident}"> Resident</a>
+    </div>
+
+
+    <div class="cards-container" id="cardsContainer"> 
+
+    </div>
+
+    <div id="contextMenu" class="context-menu">
+        <div class="context-menu-item" id="editResident">Edit</div>
+        <div class="context-menu-item" id="deleteResident">Delete</div>
+        <div class="context-menu-item" id="showRecord">View</div>
+        <div class="context-menu-item" id="markDeceased">Deceased</div>  <!-- New option -->
+    </div>
+    
+
+    <div id="confirmationModal" class="modal">
+        <div class="modal-content">
+            <p>Are you sure you want to delete this resident?</p>
+            <button class="DeleteButtons" id="confirmDeleteButton">Confirm</button>
+            <button class="DeleteButtons" id="cancelDeleteButton">Cancel</button>
+        </div>
+    </div>    
+
+    <div id="loading" style="display: none; text-align: center; padding: 20px;">
+        <p>Loading more residents...</p>
+    </div>
+
+    <script>
+
+        function showErrorModal(message) {
+            document.getElementById('errorMessage').innerText = message;
+            document.getElementById('errorModal').style.display = 'flex';
+        }
+        
+        function hideErrorModal() {
+            document.getElementById('errorModal').style.display = 'none';
+        }
+         
+        document.getElementById('closeErrorModal').onclick = hideErrorModal;
+
+        let residentIdToDelete = null;  
+
+        function showContextMenu(event, residentId) {
+            event.preventDefault();
+            event.stopPropagation();
+            
+            const contextMenu = document.getElementById('contextMenu');
+            contextMenu.style.top = `${event.pageY}px`;
+            contextMenu.style.left = `${event.pageX}px`;
+            contextMenu.style.display = 'block';
+            
+            document.getElementById('markDeceased').onclick = function() {
+                residentIdToDelete = residentId;
+                markResidentDeceased(residentId);  // Call the function to mark as deceased
+                contextMenu.style.display = 'none';
+            };
+            
+        
+            // Handle other options
+            document.getElementById('editResident').onclick = function() {
+                window.location.href = `/NewResident?id=${residentId}`;
+                contextMenu.style.display = 'none';
+            };
+        
+            document.getElementById('deleteResident').onclick = function() {
+                residentIdToDelete = residentId;
+                showConfirmationModal();
+                contextMenu.style.display = 'none';
+            };
+        
+            document.getElementById('showRecord').onclick = function() {
+                window.location.href = `/ViewRecords?id=${residentId}`;
+                contextMenu.style.display = 'none';
+            };
+        }
+        
+        
+        function showConfirmationModal() {
+            document.getElementById('confirmationModal').style.display = 'flex';
+        }
+        
+        function hideConfirmationModal() {
+            document.getElementById('confirmationModal').style.display = 'none';
+        }
+
+        
+       
+        document.getElementById('confirmDeleteButton').onclick = function() {
+            if (residentIdToDelete) {
+                deleteResident(residentIdToDelete);  
+                residentIdToDelete = null;  
+            }
+            hideConfirmationModal(); 
+        };
+        
+        document.getElementById('cancelDeleteButton').onclick = function() {
+            hideConfirmationModal();  
+        };
+        
+        function deleteResident(residentId) {
+            fetch(`/api/residents/${residentId}`, {
+                method: 'DELETE'
+            })
+            .then(response => {
+                if (response.ok) {
+                    removeResidentCard(residentId);
+                } else if (response.status === 404) {
+                    console.error('Resident not found');
+                    alert('Resident not found.');
+                } else {
+                    throw new Error('Failed to delete resident.');
+                }
+            })
+            .catch(error => {
+                console.error('Error during deletion:', error);
+                showErrorModal('Failed to remove the resident.\n Resident is still in a house.');
+            });
+        }
+        
+        function removeResidentCard(residentId) {
+            const residentCard = document.querySelector(`.card[data-id='${residentId}']`);
+            if (residentCard) {
+                residentCard.remove();
+            }
+        }
+
+        window.onclick = function() {
+            document.getElementById('contextMenu').style.display = 'none';
+        };
+
+        let page = 0;
+        const size = 10;
+        let loading = false;
+        let searchQuery = '';
+
+        // Listen to the 'input' event on the search bar for real-time search
+        document.getElementById('searchInput').addEventListener('input', searchResidents);
+
+        function searchResidents() {
+            const nameQuery = document.getElementById('searchInput').value;
+
+            const queryParams = new URLSearchParams();
+            if (nameQuery) queryParams.append("query", nameQuery);
+
+            document.getElementById('cardsContainer').innerHTML = '';  
+            page = 0; 
+            searchQuery = queryParams.toString();  
+            loadResidents(searchQuery);
+        }        
+
+        function calculateAge(birthDate) {
+            const today = new Date();
+            const birth = new Date(birthDate);
+            let age = today.getFullYear() - birth.getFullYear();
+            const month = today.getMonth();
+            const day = today.getDate();
+     
+            if (month < birth.getMonth() || (month === birth.getMonth() && day < birth.getDate())) {
+                age--;
+            }
+
+            console.log("The new Age: ", age);
+    
+            return age;
+        }
+    
+        async function loadResidents(query = '') {
+            if (loading) return;
+            loading = true;
+            document.getElementById('loading').style.display = 'block';
+        
+            try {
+                const url = query 
+                    ? `/api/residents?${query}&page=${page}&size=${size}`
+                    : `/api/residents?page=${page}&size=${size}`;
+        
+                const response = await fetch(url);
+                const contentType = response.headers.get("content-type");
+        
+                if (!contentType || !contentType.includes("application/json")) {
+                    throw new Error("Received non-JSON response");
+                }
+        
+                const residents = await response.json();
+                if (residents.length === 0 && page === 0) {
+                    document.getElementById('loading').innerText = 'No residents found';
+                    return;
+                }
+        
+                residents.forEach(resident => {   
+                    // Add a console log to check the value of isDeceased
+                    console.log(`Resident ID: ${resident.id}, isDeceased: ${resident.isDeceased}`);
+        
+                    // Only show residents that are not deceased
+                    if (resident.isDeceased === true || resident.isDeceased === 1) {
+                        console.log(`Skipping resident ${resident.id} because they are deceased.`);
+                        return;  // Skip rendering this resident if deceased
+                    }
+                
+                    const card = document.createElement('div');
+                    card.className = 'card';
+                    card.setAttribute('data-id', resident.id);
+                
+                    const age = calculateAge(resident.birthDate);
+                
+                    card.innerHTML = `
+                        <img src="/resident/photo/${resident.id}" >
+                        <h4>${resident.firstName} ${resident.lastName}</h4>
+                        <p>Age: ${age} </p> 
+                        <p>Birthdate: ${resident.birthDate}</p>
+                    `;
+                
+                    card.oncontextmenu = function(event) {
+                        showContextMenu(event, resident.id);
+                    };
+                
+                    document.getElementById('cardsContainer').appendChild(card);
+                });
+                
+                page++;
+            } catch (error) {
+                console.error('Error loading residents:', error);
+            } finally {
+                loading = false;
+                document.getElementById('loading').style.display = 'none';
+            }
+        }
+        
+        window.addEventListener('scroll', () => {
+            if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight - 100 && !loading) {
+                loadResidents(searchQuery);
+            }
+        });
+
+        function markResidentDeceased(residentId) {
+            fetch(`/api/residents/${residentId}/markDeceased`, {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ isDeceased: true }),
+            })
+            .then(response => {
+                if (response.ok) {
+                    removeResidentCard(residentId);  // Remove the card from the front-end
+                } else {
+                    throw new Error('Failed to mark resident as deceased.');
+                }
+            })
+            .catch(error => {
+                console.error('Error during marking deceased:', error);
+                showErrorModal('Failed to mark resident as deceased.');
+            });
+        }
+        
+        
+        
+
+        loadResidents();
+    </script>
+</body>
+</html>

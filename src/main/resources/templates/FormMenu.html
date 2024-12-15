@@ -1,0 +1,650 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" th:href="@{/css/FormMenu.css}">
+    <link rel="icon" href="/favicon.png" type="image/png">
+    <title>Barangay Wawa Portal</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.15.349/pdf.min.js"></script>
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <script>
+        // Prevent caching
+        if (window.performance && window.performance.navigation.type === window.performance.navigation.TYPE_BACK_FORWARD) {
+            location.replace('/login?expired');
+        }
+
+        // Session check on load
+        document.addEventListener('DOMContentLoaded', checkSession);
+        
+        // Check on visibility change
+        document.addEventListener('visibilitychange', () => {
+            if (!document.hidden) checkSession();
+        });
+
+        function checkSession() {
+            fetch('/api/check-session', {
+                credentials: 'include',
+                headers: { 'Cache-Control': 'no-cache' }
+            })
+            .then(response => {
+                if (!response.ok) window.location.replace('/login?expired');
+            })
+            .catch(() => window.location.replace('/login?expired'));
+        }
+
+        // Prevent back button
+        window.addEventListener('popstate', () => {
+            checkSession();
+        });
+    </script>
+</head>
+<body>
+
+    <div id="initialResidentModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Select Resident</h2>
+            </div>
+            <div class="modal-body">
+                <input type="text" 
+                       id="initialResidentSearch" 
+                       placeholder="Search residents..." 
+                       onkeyup="filterInitialResidents()">
+                <div id="initialResidentList" class="resident-list"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add certificate selection modal -->
+    <div id="certificateTypeModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Choose Certificate Type</h2>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>Certificate Type:</label>
+                    <select id="certificateSelect" required>
+                        <option value="">Select Certificate Type</option>
+                        <option value="BARANGAY-INDIGENCY">Certificate of Indigency</option>
+                        <option value="CLEARANCE">Barangay Clearance</option>
+                        <option value="FIRST-TIME-JOB-SEEKER">First Time Job Seeker</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Purpose:</label>
+                    <input type="text" id="purpose" placeholder="Enter purpose" required>
+                </div>
+                <div class="form-group">
+                    <label>Date:</label>
+                    <input type="date" id="dateRequested" required>
+                </div>
+                <div class="button-group">
+                    <button onclick="previewSelectedCertificate()" class="edit-btn">Preview</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="form-menu-container">
+        <div id="certificateFeedback" class="certificateFeedback" style="display:none;"></div>
+        <div class="menu">
+            <div class="logo-section">
+                <img th:src="@{/image/Logo.png}" alt="Barangay Logo" class="logo">
+                <h2>BARANGAY WAWA</h2>
+                <p>Certificate Request</p>
+            </div>
+            <div class="button-row">
+                <div class="one">
+                    <a th:href="@{/Home}"><button class="back-btn">BACK</button></a>
+                </div>
+    
+                <div class="two">
+                    <div class="userMenu">
+                        <button class="edit-btn" onclick="openResidentSearch()">SELECT RESIDENT</button>
+         
+                        <div id="residentModal">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <span class="close" onclick="closeResidentSearch()" style="font-size: 3vh;">&times;</span>
+                                    <h2>Select Resident</h2>
+                                    <input type="text" id="searchInput" placeholder="Search residents..." onkeyup="filterResidents()">
+                                </div>
+                                <div class="modal-body">
+                                    <div id="residentList" class="resident-list"> 
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+         
+                        <input type="hidden" id="residentId"> 
+                        <label for="residentName">Selected Resident: </label>
+                        <span id="residentName">None</span>                        
+                    </div>
+
+                    <button class="edit-btn" onclick="editCertificate()">EDIT</button>
+                    <button class="print-btn" onclick="printCertificate()">PRINT</button>
+                    <button class="menu-item" onclick="showAllResidents()">Show All Residents</button>
+                </div>
+            </div>
+        </div>
+ 
+        <div id="certificateCountsContainer" class="certificate-counts-container" style="display:none;">
+            <h3>Resident's Certificate Counts</h3>
+            <div id="certificateCountsContent"></div>
+            <button onclick="closeCertificateCounts()">Close</button>
+        </div>
+ 
+        <div id="allResidentsContainer" class="all-residents-container" style="display:none;">
+            <h3>All Residents and their Certificate Counts</h3>
+            <input 
+                type="text" 
+                id="allResidentsSearch" 
+                placeholder="Search residents..." 
+                onkeyup="filterAllResidents()"
+                class="search-input"
+            >
+            <div id="residentListContainer"></div>
+            <button onclick="closeAllResidentsContainer()">Close</button>
+        </div>
+
+        <div class="content">
+            <div class="certificate-preview" id="pdfPreview">
+                <h1>Select a certificate to preview</h1>
+            </div>
+        </div>
+    </div>
+    
+<script> 
+    let allResidentsList = []; // Store all residents
+
+    function filterAllResidents() {
+        const searchTerm = document.getElementById('allResidentsSearch').value.toLowerCase();
+        const filteredResidents = allResidentsList.filter(resident => 
+            `${resident.firstName} ${resident.lastName}`.toLowerCase().includes(searchTerm)
+        );
+        displayAllResidents(filteredResidents);
+    }
+
+    function fetchResidentsWithCounts() {
+        fetch('/api/residents/with-counts')
+        .then(response => response.json())
+        .then(data => {
+            allResidentsList = data.residents; // Store all residents
+            displayAllResidents(allResidentsList);
+        })
+        .catch(error => console.error('Error fetching residents with counts:', error));
+    
+    }
+
+    function closeAllResidentsContainer() {
+        document.getElementById('allResidentsContainer').style.display = 'none';
+    }
+ 
+    function displayAllResidents(residents) {
+        if (!Array.isArray(residents)) {
+            console.error('Expected an array, but got:', residents);
+            return;
+        }
+    
+        const container = document.getElementById('residentListContainer');
+        container.innerHTML = '';  
+    
+        residents.forEach(resident => {
+            const residentDiv = document.createElement('div');
+            residentDiv.classList.add('resident-info');
+            residentDiv.innerHTML = `
+                <strong>${resident.firstName} ${resident.lastName}</strong><br>
+                Certificate of Indigency: ${resident.certificateOfIndigencyCount}<br>
+                Barangay Clearance: ${resident.barangayClearanceCount}<br>
+                Certificate of First Time Job Seeker: ${resident.firstTimeJobSeekerCount}<br>
+            `;
+            container.appendChild(residentDiv);
+        });
+     
+        document.getElementById('allResidentsContainer').style.display = 'flex';
+    }
+    
+ 
+    function showAllResidents() {
+        fetchResidentsWithCounts();
+    }
+ 
+ 
+ 
+    function showResidentCertificateCounts() {
+        const residentId = document.getElementById('residentId').value;
+    
+        if (!residentId) {
+            alert("Please select a resident first.");
+            return;
+        }
+     
+        fetch(`/api/residents/${residentId}/certificate-counts`)  
+            .then(response => response.json())
+            .then(data => {
+                if (data) {
+                    displayCertificateCounts(data);
+                } else {
+                    alert("No certificate counts found.");
+                }
+            })
+            .catch(error => {
+                console.error("Error fetching certificate counts:", error);
+                alert("Error fetching certificate counts.");
+            });
+    }
+ 
+    function displayCertificateCounts(data) {
+        const certificateCountsContainer = document.getElementById('certificateCountsContent');
+        certificateCountsContainer.innerHTML = '';  
+    
+        const certificateTypes = ['Certificate of Indigency', 'Barangay Clearance', 'Certificate of First Time Job Seeker'];
+        
+        certificateTypes.forEach(certificate => {
+            const count = data[certificate.replace(/\s+/g, '').toLowerCase()] || 0;
+            const countElement = document.createElement('p');
+            countElement.textContent = `${certificate}: ${count} times`;
+            certificateCountsContainer.appendChild(countElement);
+        });
+     
+        document.getElementById('certificateCountsContainer').style.display = 'block';
+    }
+     
+    function closeCertificateCounts() {
+        document.getElementById('certificateCountsContainer').style.display = 'none';
+    } 
+    let residents = [];
+ 
+    function fetchResidents() {
+        fetch('/api/residents')  
+            .then(response => response.json())
+            .then(data => {
+                residents = data;
+                displayResidentList(residents);
+            })
+            .catch(error => console.error('Error fetching residents:', error));
+    }
+     
+    function displayResidentList(residents) {
+        const residentListContainer = document.getElementById('residentList');
+        residentListContainer.innerHTML = '';  
+    
+        residents.forEach(resident => {
+            const residentItem = document.createElement('div');
+            residentItem.classList.add('resident-item');
+            residentItem.textContent = `${resident.firstName} ${resident.lastName}`;
+            residentItem.onclick = function() {
+                document.getElementById('residentId').value = resident.id;  
+                document.getElementById('residentName').textContent = `${resident.firstName} ${resident.lastName}`;   
+                closeResidentSearch();   
+            };
+            residentListContainer.appendChild(residentItem);
+        });
+    }
+    
+    // Open the resident search modal
+    function openResidentSearch() {
+        document.getElementById('residentModal').style.display = 'block';
+        fetchResidents();
+    }
+    
+    // Close the resident search modal
+    function closeResidentSearch() {
+        document.getElementById('residentModal').style.display = 'none';
+    }
+    
+    // Filter residents based on search input
+    function filterResidents() {
+        const searchInput = document.getElementById('searchInput').value.toLowerCase();
+        const filteredResidents = residents.filter(resident => {
+            return `${resident.firstName} ${resident.lastName}`.toLowerCase().includes(searchInput);
+        });
+        displayResidentList(filteredResidents);
+    }
+     
+    const pdfjsLib = window['pdfjs-dist/build/pdf'];
+    let currentPdfFile = '';
+    let editableFields = [];
+    let scale = 1.5;
+    
+    function loadCertificate(pdfFileName) {
+        currentPdfFile = pdfFileName;
+        const pdfUrl = `/pdfs/${pdfFileName}`; 
+        const pdfContainer = document.getElementById('pdfPreview');
+        pdfContainer.innerHTML = ""; 
+    
+        pdfjsLib.getDocument(pdfUrl).promise.then(pdf => {
+            pdf.getPage(1).then(page => {
+                const viewport = page.getViewport({ scale: scale });
+                const canvas = document.createElement('canvas');
+                const context = canvas.getContext('2d');
+                canvas.height = viewport.height;
+                canvas.width = viewport.width;
+    
+                const renderContext = {
+                    canvasContext: context,
+                    viewport: viewport
+                };
+                page.render(renderContext);
+    
+                pdfContainer.appendChild(canvas);
+            });
+        }).catch(error => {
+            pdfContainer.innerHTML = `<p>Error loading PDF: ${error.message}</p>`;
+        });
+    }
+
+
+    
+    function editCertificate() {
+        const pdfContainer = document.getElementById('pdfPreview');
+        const canvas = pdfContainer.querySelector('canvas');
+        
+        
+        if (!canvas) {
+            alert('Please load a certificate first.');
+            return;
+        }
+
+        
+        pdfContainer.classList.add('edit-mode');
+        
+       
+        canvas.addEventListener('click', function(event) {
+            const rect = canvas.getBoundingClientRect();
+            const x = event.clientX - rect.left;
+            const y = event.clientY - rect.top;
+
+           
+            const editableField = document.createElement('input');
+            editableField.type = 'text';
+            editableField.className = 'editable-field';
+            editableField.style.left = `${x}px`;
+            editableField.style.top = `${y+30}px`;
+
+           
+            pdfContainer.appendChild(editableField);
+            editableFields.push(editableField); 
+          
+            editableField.focus();
+        });
+    }
+
+    function saveEditedPdf() {
+        const data = editableFields.map(field => ({
+            x: field.style.left,
+            y: field.style.top,
+            text: field.value
+        }));
+
+        fetch(`/edit-pdf`, {
+            method: 'POST',
+            body: JSON.stringify({
+                file: currentPdfFile,
+                edits: data
+            }),
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        })
+        .then(response => response.blob())
+        .then(modifiedPdfBlob => {
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(modifiedPdfBlob);
+            link.download = currentPdfFile;
+            link.click();
+        })
+        .catch(error => console.error('Error saving edited PDF:', error));
+    }
+
+    function printCertificate() {
+        const residentId = document.getElementById('residentId').value; // Correct ID
+        const residentName = document.getElementById('residentName').textContent;
+        const pdfContainer = document.querySelector('.certificate-preview');
+        const canvas = pdfContainer.querySelector('canvas');
+        const fields = pdfContainer.querySelectorAll('.editable-field');
+    
+        if (!residentId || residentName === 'None') {
+            alert("Please select a resident first.");
+            return;
+        }
+    
+        if (!canvas) {
+            alert('Please load a certificate first.');
+            return;
+        }
+    
+        const canvasRect = canvas.getBoundingClientRect();
+        const scaleX = canvas.width / canvasRect.width;
+        const scaleY = canvas.height / canvasRect.height;
+    
+        const printWindow = window.open('', '_blank');
+        printWindow.document.write(`
+            <!DOCTYPE html>
+            <html lang="en">
+            <head>
+                <meta charset="UTF-8">
+                <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                <title>Print Certificate</title>
+                <style>
+                    body {
+                        margin: 0;
+                        padding: 0;
+                        position: relative;
+                    }
+                    canvas {
+                        display: block;
+                        position: absolute;
+                        top: 0;
+                        left: 0;
+                        width: ${canvas.width}px;
+                        height: ${canvas.height}px;
+                    }
+                    .editable-field {
+                        position: absolute;
+                        font-family: Arial, sans-serif;
+                        color: black;
+                        white-space: nowrap;
+                        overflow: hidden;
+                    }
+                </style>
+            </head>
+            <body>
+        `);
+    
+        const canvasClone = canvas.cloneNode();
+        const canvasContext = canvasClone.getContext('2d');
+        canvasContext.drawImage(canvas, 0, 0);
+        printWindow.document.body.appendChild(canvasClone);
+    
+        fields.forEach(field => {
+            const fieldClone = document.createElement('div');
+            fieldClone.className = 'editable-field';
+    
+            const left = parseFloat(field.style.left) * scaleX;
+            const top = parseFloat(field.style.top) * scaleY;
+    
+            fieldClone.style.left = `${left}px`;
+            fieldClone.style.top = `${top - 40}px`;
+            fieldClone.style.fontSize = `${parseFloat(getComputedStyle(field).fontSize) * scaleX}px`;
+            fieldClone.textContent = field.value;
+    
+            printWindow.document.body.appendChild(fieldClone);
+        });
+    
+        printWindow.document.write(`
+            </body>
+            </html>
+        `);
+        printWindow.document.close();
+    
+        printWindow.onload = () => {
+            printWindow.focus();
+            printWindow.print();
+    
+            printWindow.onafterprint = () => {
+                // Increment certificate count only after printing is done
+                incrementCertificateCount(residentId, currentPdfFile.replace('.pdf', ''));
+                printWindow.close();
+            };
+        };
+    }
+        
+
+    
+    function incrementCertificateCount(residentId, certificateType) {
+        fetch(`/api/residents/${residentId}/increment-certificate?certificateType=${certificateType}`, {
+            method: 'POST',
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.certificateCount !== undefined) {
+                const feedback = document.getElementById('certificateFeedback');
+                feedback.textContent = `Updated certificate count: ${data.certificateCount}`;
+                feedback.style.display = 'flex'; 
+                setTimeout(() => feedback.style.display = 'none', 3000);  
+            } else {
+                throw new Error("Invalid response from the server.");
+            }
+        })
+        .catch(error => alert('Error updating certificate count: ' + error.message));
+    }
+
+    // Auto-open modal on page load
+    document.addEventListener('DOMContentLoaded', () => {
+        document.getElementById('initialResidentModal').style.display = 'block';
+        fetchInitialResidents();
+    });
+
+    function fetchInitialResidents() {
+        fetch('/api/residents')
+            .then(response => response.json())
+            .then(data => {
+                residents = data;
+                displayInitialResidents(residents);
+            })
+            .catch(error => console.error('Error:', error));
+    }
+
+    function filterInitialResidents() {
+        const searchTerm = document.getElementById('initialResidentSearch').value.toLowerCase();
+        const filteredResidents = residents.filter(resident => 
+            `${resident.firstName} ${resident.lastName}`.toLowerCase().includes(searchTerm)
+        );
+        displayInitialResidents(filteredResidents);
+    }
+
+    function displayInitialResidents(residentsToDisplay) {
+        const listContainer = document.getElementById('initialResidentList');
+        listContainer.innerHTML = '';
+
+        residentsToDisplay.forEach(resident => {
+            const div = document.createElement('div');
+            div.className = 'resident-item';
+            div.textContent = `${resident.firstName} ${resident.lastName}`;
+            div.onclick = () => {
+                selectedResidentId = resident.id;
+                document.getElementById('residentId').value = resident.id;
+                document.getElementById('residentName').textContent = 
+                    `${resident.firstName} ${resident.lastName}`;
+                document.getElementById('initialResidentModal').style.display = 'none';
+                document.getElementById('certificateTypeModal').style.display = 'block';
+            };
+            listContainer.appendChild(div);
+        });
+    }
+
+    function previewSelectedCertificate() {
+        const type = document.getElementById('certificateSelect').value;
+        const purpose = document.getElementById('purpose').value;
+        const date = document.getElementById('dateRequested').value;
+        
+        if (!type || !purpose || !date) {
+            alert('Please fill all fields');
+            return;
+        }
+        
+        certificateDetails = { type, purpose, date };
+        document.getElementById('certificateTypeModal').style.display = 'none';
+        loadCertificate(`${type}.pdf`);
+    }
+</script>
+
+<style>
+#initialResidentModal .modal-content {
+    margin: 10% auto;
+    max-width: 500px;
+}
+
+#initialResidentSearch {
+    width: 100%;
+    padding: 10px;
+    margin: 10px 0;
+    border-radius: 5px;
+    border: 1px solid #ddd;
+}
+
+.button-group{
+    display: flex; 
+    justify-content: center;
+}
+
+.button-group button{
+    padding: 5px 10px;
+    border: white 3px solid;
+    background-color: dodgerblue;
+    border-radius: 10px;
+    color: white;
+}
+
+#initialResidentList {
+    max-height: 300px;
+    overflow-y: auto;
+    background: white;
+    border-radius: 5px;
+    margin-top: 10px;
+}
+
+.resident-item {
+    padding: 10px;
+    cursor: pointer;
+    border-bottom: 1px solid #ddd;
+}
+
+.resident-item:hover {
+    background: #f0f0f0;
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 5px;
+    color: white;
+}
+
+.form-group select,
+.form-group input {
+    width: 100%;
+    padding: 8px;
+    border-radius: 4px;
+    border: 1px solid #ddd;
+}
+
+.search-input {
+    width: 90%;
+    padding: 10px;
+    margin: 10px 0;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    font-size: 14px;
+}
+</style>
+</body>
+</html>

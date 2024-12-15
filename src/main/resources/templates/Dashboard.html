@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <title>Barangay Wawa Portal</title>
+    <link rel="stylesheet" th:href="@{/css/Dashboard.css}">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="/favicon.png" type="image/png">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <script>
+        // Prevent caching
+        if (window.performance && window.performance.navigation.type === window.performance.navigation.TYPE_BACK_FORWARD) {
+            location.replace('/login?expired');
+        }
+
+        // Session check on load
+        document.addEventListener('DOMContentLoaded', checkSession);
+        
+        // Check on visibility change
+        document.addEventListener('visibilitychange', () => {
+            if (!document.hidden) checkSession();
+        });
+
+        function checkSession() {
+            fetch('/api/check-session', {
+                credentials: 'include',
+                headers: { 'Cache-Control': 'no-cache' }
+            })
+            .then(response => {
+                if (!response.ok) window.location.replace('/login?expired');
+            })
+            .catch(() => window.location.replace('/login?expired'));
+        }
+
+        // Prevent back button
+        window.addEventListener('popstate', () => {
+            checkSession();
+        });
+    </script>
+</head>
+<body>
+    <section class="Content">
+        <div class="Top">
+            <div class="Menu" role="button" tabindex="0" onclick="toggleMenuBar()" onkeypress="toggleMenuBar()"></div>
+            <div class="mid">
+                DASH BOARD
+            </div>
+            <div class="Map">
+                <a th:href="@{/Home}"><img th:src="@{/image/Group-38.png}" alt="Map"></a>
+            </div>
+        </div>
+        <div class="MenuBar" id="MenuBar">
+            <div class="Return" onclick="closeMenuBar()">X</div>
+            <a th:href="@{/NewResident}" class="BarSlot">Add New Resident</a>
+            <a th:href="@{/FormMenu}" class="BarSlot">Request A Form</a>
+            <a th:href="@{/Records}" class="BarSlot">View Records</a>
+            <a th:href="@{/BusinessRecords}" class="BarSlot">Business Records</a>
+            <a th:href="@{/Blotter}" class="BarSlot">Blotter</a>
+        </div>  
+        <div class="MContent">
+            <div class="TopBuffer"></div>
+            <div class="BottomContent">
+                <div class="container">
+                    <div class="stat-box" data-category="Total Population" onclick="showResidents(event, 'Total Population')">
+                        <div class="icon">
+                            <img th:src="@{/image/group.png}" alt="">
+                        </div>
+                        <div class="content">
+                            <h3>POPULATION</h3>
+                            <p th:text="${totalPopulation}"></p>
+                        </div>
+                    </div>
+                
+                    <div class="stat-box" data-category="Senior Citizens" onclick="showResidents(event, 'Senior Citizens')">
+                        <div class="icon">
+                            <img th:src="@{/image/elderly.png}" alt="">
+                        </div>
+                        <div class="content">
+                            <h3>SENIOR CITIZENS</h3>
+                            <p th:text="${seniorCitizens}"></p>
+                        </div>
+                    </div>
+
+                    <div class="stat-box" data-category="Male" onclick="showResidents(event, 'Male')">
+                        <div class="icon">
+                            <img th:src="@{/image/Male.png}" alt="">
+                        </div>
+                        <div class="content">
+                            <h3>MALE</h3>
+                            <p th:text="${maleCount}"></p>
+                        </div>
+                    </div>
+                
+                    <div class="stat-box" data-category="Female" onclick="showResidents(event, 'Female')">
+                        <div class="icon">
+                            <img th:src="@{/image/Female.png}" alt="">
+                        </div>
+                        <div class="content">
+                            <h3>FEMALE</h3>
+                            <p th:text="${femaleCount}"></p>
+                        </div>
+                    </div>
+                
+                    <div class="stat-box" data-category="Voters" onclick="showResidents(event, 'Voters')">
+                        <div class="icon">
+                            <img th:src="@{/image/Elections.png}" alt="">
+                        </div>
+                        <div class="content">
+                            <h3>VOTERS</h3>
+                            <p th:text="${voters}"></p>
+                        </div>
+                    </div>
+                
+                    <div class="stat-box" data-category="Non Voters" onclick="showResidents(event, 'Non Voters')">
+                        <div class="icon">
+                            <img th:src="@{/image/group.png}" alt="">
+                        </div>
+                        <div class="content">
+                            <h3>NON VOTERS</h3>                     
+                            <p th:text="${nonVoters}"></p>  
+                        </div>
+                    </div>
+                    
+                    <div class="stat-box" data-category="PWD" onclick="showResidents(event, 'PWD')">
+                        <div class="icon">
+                            <img th:src="@{/image/pwd.png}" alt="">
+                        </div>
+                        <div class="content">
+                            <h3>PWD</h3>
+                            <p th:text="${pwdCount}"></p>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-box" data-category="Deceased" onclick="showResidents(event, 'Deceased')">
+                        <div class="icon">
+                            <img th:src="@{/image/deceased.png}" alt="">
+                        </div>
+                        <div class="content">
+                            <h3>DECEASED</h3>
+                            <p th:text="${deceasedCount}"></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <section class="MaV2">        
+        <div class="Logo">
+            <img th:src="@{/image/Logo.png}" class="logo" alt="Logo">
+            <div class="Big">
+                MAP OF BARANGAY WAWA
+            </div>
+        </div>
+        <div style="height: 10%; width: 100%;"></div>
+        <div class="Message"></div>
+    </section>
+    <script>
+        function closeMenuBar() {
+            const menuBar = document.getElementById("MenuBar");
+            menuBar.style.display = "none";
+        }
+        function toggleMenuBar() {
+            const menuBar = document.getElementById('MenuBar');
+            if (menuBar.style.display === 'none' || menuBar.style.display === '') {
+                menuBar.style.display = 'block';  
+            } else {
+                menuBar.style.display = 'none';   
+            }
+        }
+
+        function showResidents(event, category) {
+            event.preventDefault();
+            const existingModal = document.getElementById("residentModal");
+            if (existingModal) {
+                existingModal.remove();
+            }
+    
+            fetch(`/api/residents?category=${category}`)
+                .then(response => response.json())
+                .then(data => {
+                    const filteredData = data.filter(resident => {
+                        if (category === "Deceased") {
+                            return resident.isDeceased === 1 || resident.isDeceased === true;
+                        } else {
+                            return !resident.isDeceased; // Exclude deceased residents for other categories
+                        }
+                    });
+                    displayModal(filteredData, category);
+                })
+                .catch(error => {
+                    console.error("Error fetching residents:", error);
+                });
+        }
+    
+        function displayModal(residents, category) {
+            const modal = document.createElement("div");
+            modal.id = "residentModal";
+    
+            const title = document.createElement("h3");
+            title.textContent = `${category}`;
+            modal.appendChild(title);
+    
+            const searchInput = document.createElement("input");
+            searchInput.type = "text";
+            searchInput.placeholder = "Search by name...";
+            searchInput.style.marginBottom = "10px";
+            searchInput.style.width = "100%";
+            searchInput.style.padding = "10px 5px";
+            searchInput.addEventListener("input", () => filterResidents(searchInput.value));
+            modal.appendChild(searchInput);
+    
+            const listContainer = document.createElement("div");
+            listContainer.id = "residentList";
+            modal.appendChild(listContainer);
+    
+            const renderList = (filter = "") => {
+                listContainer.innerHTML = "";
+                const filteredResidents = residents.filter(resident =>
+                    `${resident.firstName} ${resident.lastName}`.toLowerCase().includes(filter.toLowerCase())
+                );
+                filteredResidents.forEach(resident => {
+                    const listItem = document.createElement("div");
+                    listContainer.id = "residentIn";
+                    listItem.textContent = `${resident.firstName} ${resident.lastName} (Age: ${resident.age})`;
+                    listItem.style.padding = "10px";
+                    listItem.style.cursor = "pointer";
+                    listItem.style.borderBottom = "1px solid #ccc";
+    
+                    listItem.addEventListener("dblclick", () => {
+                        window.location.href = `/ViewRecords?id=${resident.id}`;
+                    });
+                    listContainer.appendChild(listItem);
+                });
+            };
+    
+            renderList();
+    
+            const filterResidents = (filter) => {
+                renderList(filter);
+            };
+    
+            const closeButton = document.createElement("button");
+            closeButton.textContent = "Close";
+            closeButton.style.marginTop = "10px";
+            closeButton.addEventListener("click", () => modal.remove());
+            modal.appendChild(closeButton);
+    
+            document.body.appendChild(modal);
+        }        
+    </script>
+</body>
+</html>

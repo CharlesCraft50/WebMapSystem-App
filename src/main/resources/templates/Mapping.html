@@ -1,0 +1,1564 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <title>Barangay Wawa Portal</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="/favicon.png" type="image/png">
+    <link rel="stylesheet" th:href="@{/css/Mapping.css}"> 
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" /> 
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <script type="text/javascript" th:src="@{/js/Mappin.js}"></script>
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <script>
+        // Prevent caching
+        if (window.performance && window.performance.navigation.type === window.performance.navigation.TYPE_BACK_FORWARD) {
+            location.replace('/login?expired');
+        }
+
+        // Session check on load
+        document.addEventListener('DOMContentLoaded', checkSession);
+        
+        // Check on visibility change
+        document.addEventListener('visibilitychange', () => {
+            if (!document.hidden) checkSession();
+        });
+
+        function checkSession() {
+            fetch('/api/check-session', {
+                credentials: 'include',
+                headers: { 'Cache-Control': 'no-cache' }
+            })
+            .then(response => {
+                if (!response.ok) window.location.replace('/login?expired');
+            })
+            .catch(() => window.location.replace('/login?expired'));
+        }
+
+        // Prevent back button
+        window.addEventListener('popstate', () => {
+            checkSession();
+        });
+    </script>
+</head>
+<body> 
+    <div class="search-container" id="search-container">
+    <input type="text" id="search-bar" placeholder="Search by Name..." />
+    <ul id="resident-listing"></ul>
+    </div>
+
+    <div id="custom-alert" class="custom-alert" style="display: none;">
+        <div class="alert-content">
+            <p id="alert-message"></p>
+            <button onclick="closeAlert()">OK</button>
+        </div>
+    </div>
+    <div id="custom-confirm" class="custom-confirm" style="display: none;">
+        <div class="confirm-content">
+            <p id="confirm-message"></p>
+            <button id="confirm-yes" onclick="confirmYes()">Yes</button>
+            <button id="confirm-no" onclick="confirmNo()">No</button>
+        </div>
+    </div>
+    <div id="add-options-popup" class="custom-popup" style="display: none;">
+        <div class="popup-content">
+            <h3>Select an Option</h3>
+            <button onclick="selectAddOption('house')">Add House</button>
+            <button onclick="selectAddOption('business')">Add Business</button>
+            <button onclick="selectAddOption('school')">Add School</button>
+            <button onclick="selectAddOption('church')">Add Church</button>
+            <button onclick="closeAddOptionsPopup()">Cancel</button>
+        </div>
+    </div>
+    
+    <div id="resident-modal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <span class="close" onclick="closeResidentModal()">&times;</span>
+            <h3>Select a Resident to Add</h3>
+            <input type="text" id="resident-search" placeholder="Search by name..." oninput="filterResidents()">
+            <div id="resident-list">
+    
+            </div>
+            <div id="residentContainer">
+ 
+            </div>
+        </div>
+    </div>
+    <section class="mapWhole" id="mapWhole">
+        <div class="Logo">
+            <a th:href= "@{/Home}"><img th:src="@{/image/Logo.png}" class="logo" alt="Logo"></a>
+            <div class="Big">MAP OF BARANGAY WAWA</div>
+        </div>
+        <div class="Mapp">
+            <div id="map-container"></div>
+        </div>  
+    </section>
+    
+    <section class="MaV2" id="MaV2">
+        <button class="floating-btn" id="toggle-container-btn">
+            <span>🔍</span> 
+        </button>
+        <div class="myBuffer"></div>
+        <div class="legends">
+            <h3>LEGENDS</h3>
+            <div class="main">
+                <div class="onee">
+                    <div id="enlargeSchool" class="legendsIcon">
+                        <img th:src="@{/image/school.png}" alt="">
+                        <div class="legandsName">School</div>
+                    </div>
+                    <div id="enlargeHouse" class="legendsIcon">
+                        <img th:src="@{/image/house.png}" alt="">
+                        <div class="legandsName">House</div>
+                    </div>
+                </div>
+                <div class="onee">
+                    <div id="enlargeBusiness"  class="legendsIcon">
+                        <img th:src="@{/image/business.png}" alt="">
+                        <div class="legandsName">Business</div>
+                    </div>
+                    <div id="enlargeChurch" class="legendsIcon">
+                        <img th:src="@{/image/church.png}" alt="">
+                        <div class="legandsName">Church</div>
+                    </div>
+                </div>
+            </div>
+
+        </div>  
+        <div class="Message"></div>
+    </section>
+
+    <div id="markerContextMenu" class="context-menu" style="display: none;">
+        <button onclick="deleteSelectedMarker()">Delete</button>
+    </div>
+
+    <!-- Add context menu HTML -->
+    <div id="markerContextMenu" class="marker-context-menu" style="display: none;">
+        <button onclick="deleteSelectedHouse()">Delete House</button>
+    </div>
+
+    <script>
+        let map;
+        let houseMarkers = [];
+        let schoolMarkers = [];
+        let churchMarkers = [];
+        let businessMarkers = [];
+        const houseIcon = L.icon({
+            iconUrl: '/image/house.png',
+            iconSize: [25, 25],
+            iconAnchor: [15, 30],
+            popupAnchor: [0, -30]
+        });
+ 
+        function initMap() {
+            map = L.map('map-container').setView([14.815954950252898, 120.9040586417607], 17);
+        
+            L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+                maxZoom: 22,
+                attribution: 'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community'
+            }).addTo(map);
+
+            var district1Coords = [                 
+                [14.816960928803324, 120.90833919661408],
+                [14.816004340459735, 120.9075305350192],
+                [14.815522449681932, 120.90740059946079],
+                [14.814740886418702, 120.90737296051745],
+                [14.813790091975733, 120.9074650903329],
+                [14.813629770256815, 120.90755491689858],
+                [14.813424914554437, 120.90778063493543],
+                [14.813340300186065, 120.90802477893449],
+                [14.813264544386794, 120.90869691963967],
+                [14.813194331211351, 120.90897774395629],
+                [14.813053904792191, 120.90916173230165],
+                [14.812780072989042, 120.90923435928644],
+                [14.812555390245098, 120.90916657410658],
+                [14.812295600531979, 120.90905037094109],
+                [14.812091981349887, 120.90886154079719],
+                [14.81194453285719, 120.90867028975397],
+                [14.811869638346286, 120.90845482971794],
+                [14.811792403354797, 120.90809653662437],
+                [14.811839212436146, 120.90743805200363],
+                [14.811991341905678, 120.90679651369416],
+                [14.813524224347153, 120.9036509443927],
+                [14.81381443821639, 120.90294162090333],
+                [14.81390571508546, 120.90241870664296],
+                [14.81392911940297, 120.90171664585145],
+                [14.81407124432713, 120.90142373874787],
+                [14.814092290492633, 120.90090126401462],
+                [14.814123859737048, 120.9007379906605],
+                [14.814176475134175, 120.90025905548836],
+                [14.814281705890105, 120.89979100520651],
+                [14.814381158099968, 120.89977898550886],
+                [14.814918463815888, 120.89944996317689],
+                [14.815253741917916, 120.89908759397969],
+                [14.81555248285712, 120.89877635663863],
+                [14.815758807307807, 120.89864963857484],
+                [14.815939341028887, 120.89858516798277],
+                [14.816104830141027, 120.89854292862933],
+                [14.816276766747006, 120.89854959800093],
+                [14.816468046071643, 120.89859406047809],
+                [14.816657176013559, 120.89865408482245],
+                [14.816775382143394, 120.89875634852022],
+                [14.816824813778558, 120.89886528158961],
+                [14.81680976936905, 120.89894309092486],
+                [14.816730248901434, 120.89911649458631],
+                [14.816579804693644, 120.89928767512389],
+                [14.81647879209549, 120.89934103009665],
+                [14.816312434734135, 120.89940463874748],
+                [14.816133652083945, 120.89946371406617],
+                [14.816113787335924, 120.89947141954254],
+                [14.816031845231096, 120.89950994692428],
+                [14.815900241179671, 120.89956131676664],
+                [14.815850579252704, 120.89965891946709],
+                [14.815763670853112, 120.89978477558086],
+                [14.815741322973292, 120.89998254947388],
+                [14.815793468022616, 120.90017775487479],
+                [14.815935004522967, 120.90032672743236],
+                [14.817191447296628, 120.90111525451877],
+                [14.817787385998347, 120.90141576810258],
+                [14.818142465350736, 120.90145429548436],
+                [14.818509959462055, 120.9013926516737],
+                [14.818586934498885, 120.901377240721],
+                [14.819216162078202, 120.9012306832041],
+                [14.81923998310832, 120.90136620669965],
+                [14.819259833963997, 120.90191240746078],
+                [14.819251893620955, 120.9025900249482],
+                [14.819228072592988, 120.90295963449283],
+                [14.81930350583904, 120.9032347882597],
+                [14.819305117724841, 120.90361008169697],
+                [14.819332000850517, 120.90413426437246],
+                [14.819526903399755, 120.9045458242419],
+                [14.8196590213213, 120.9048501040749],
+                [14.819546784425844, 120.905113585824],
+                [14.819245021462981, 120.90555086818917],
+                [14.81904405045041, 120.90593205101888],
+                [14.81899285928943, 120.90628697545746],
+                [14.818913997204369, 120.90677070312664],
+                [14.818122607680873, 120.90764942735457],
+                [14.81747233791041, 120.90851240896926],
+                [14.816960928803324, 120.90833919661408]
+            ];
+    
+            L.polyline(district1Coords, { color: 'blue' }).addTo(map).bindPopup("Barangay Wawa");
+
+            const wawaBorder = [                 
+                [14.816960928803324, 120.90833919661408],
+                [14.816004340459735, 120.9075305350192],
+                [14.815522449681932, 120.90740059946079],
+                [14.814740886418702, 120.90737296051745],
+                [14.813790091975733, 120.9074650903329],
+                [14.813629770256815, 120.90755491689858],
+                [14.813424914554437, 120.90778063493543],
+                [14.813340300186065, 120.90802477893449],
+                [14.813264544386794, 120.90869691963967],
+                [14.813194331211351, 120.90897774395629],
+                [14.813053904792191, 120.90916173230165],
+                [14.812780072989042, 120.90923435928644],
+                [14.812555390245098, 120.90916657410658],
+                [14.812295600531979, 120.90905037094109],
+                [14.812091981349887, 120.90886154079719],
+                [14.81194453285719, 120.90867028975397],
+                [14.811869638346286, 120.90845482971794],
+                [14.811792403354797, 120.90809653662437],
+                [14.811839212436146, 120.90743805200363],
+                [14.811991341905678, 120.90679651369416],
+                [14.813524224347153, 120.9036509443927],
+                [14.81381443821639, 120.90294162090333],
+                [14.81390571508546, 120.90241870664296],
+                [14.81392911940297, 120.90171664585145],
+                [14.81407124432713, 120.90142373874787],
+                [14.814092290492633, 120.90090126401462],
+                [14.814123859737048, 120.9007379906605],
+                [14.814176475134175, 120.90025905548836],
+                [14.814281705890105, 120.89979100520651],
+                [14.814381158099968, 120.89977898550886],
+                [14.814918463815888, 120.89944996317689],
+                [14.815253741917916, 120.89908759397969],
+                [14.81555248285712, 120.89877635663863],
+                [14.815758807307807, 120.89864963857484],
+                [14.815939341028887, 120.89858516798277],
+                [14.816104830141027, 120.89854292862933],
+                [14.816276766747006, 120.89854959800093],
+                [14.816468046071643, 120.89859406047809],
+                [14.816657176013559, 120.89865408482245],
+                [14.816775382143394, 120.89875634852022],
+                [14.816824813778558, 120.89886528158961],
+                [14.81680976936905, 120.89894309092486],
+                [14.816730248901434, 120.89911649458631],
+                [14.816579804693644, 120.89928767512389],
+                [14.81647879209549, 120.89934103009665],
+                [14.816312434734135, 120.89940463874748],
+                [14.816133652083945, 120.89946371406617],
+                [14.816113787335924, 120.89947141954254],
+                [14.816031845231096, 120.89950994692428],
+                [14.815900241179671, 120.89956131676664],
+                [14.815850579252704, 120.89965891946709],
+                [14.815763670853112, 120.89978477558086],
+                [14.815741322973292, 120.89998254947388],
+                [14.815793468022616, 120.90017775487479],
+                [14.815935004522967, 120.90032672743236],
+                [14.817191447296628, 120.90111525451877],
+                [14.817787385998347, 120.90141576810258],
+                [14.818142465350736, 120.90145429548436],
+                [14.818509959462055, 120.9013926516737],
+                [14.818586934498885, 120.901377240721],
+                [14.819216162078202, 120.9012306832041],
+                [14.81923998310832, 120.90136620669965],
+                [14.819259833963997, 120.90191240746078],
+                [14.819251893620955, 120.9025900249482],
+                [14.819228072592988, 120.90295963449283],
+                [14.81930350583904, 120.9032347882597],
+                [14.819305117724841, 120.90361008169697],
+                [14.819332000850517, 120.90413426437246],
+                [14.819526903399755, 120.9045458242419],
+                [14.8196590213213, 120.9048501040749],
+                [14.819546784425844, 120.905113585824],
+                [14.819245021462981, 120.90555086818917],
+                [14.81904405045041, 120.90593205101888],
+                [14.81899285928943, 120.90628697545746],
+                [14.818913997204369, 120.90677070312664],
+                [14.818122607680873, 120.90764942735457],
+                [14.81747233791041, 120.90851240896926],
+                [14.816960928803324, 120.90833919661408]
+            ];
+    
+            map.on('contextmenu', function (e) { 
+                const point = [e.latlng.lat, e.latlng.lng];
+                if (!isPointInPolygon(point, wawaBorder)) {
+                    e.originalEvent.preventDefault();
+                    return;
+                }
+                if (e.originalEvent.target.classList.contains('leaflet-marker-icon')) {
+                    return; // Don't show map context menu if clicking on a marker
+                }
+                
+                showAddOptionsPopup(e.latlng);
+                addTemporaryCircle(e.latlng);
+            });
+
+            map.on('click', (e) => {
+                closeAddOptionsPopup();
+                document.getElementsByClassName("Info").style.display = "none";
+            });
+            
+            fetchHouses();
+            fetchHousesAndEstablishments();
+
+        }
+
+        function isPointInPolygon(point, polygon) {
+            let inside = false;
+            for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i++) {
+                const xi = polygon[i][0], yi = polygon[i][1];
+                const xj = polygon[j][0], yj = polygon[j][1];
+                
+                const intersect = ((yi > point[1]) !== (yj > point[1]))
+                    && (point[0] < (xj - xi) * (point[1] - yi) / (yj - yi) + xi);
+                if (intersect) inside = !inside;
+            }
+            return inside;
+        }
+
+        function closeUponClick() {
+            document.getElementsByClassName("Message").style.display = "none";
+        }
+
+        let confirmCallback;  
+ 
+        function showConfirm(message, callback) {
+            document.getElementById("confirm-message").textContent = message;
+            document.getElementById("custom-confirm").style.display = "flex";
+            confirmCallback = callback;  
+        }
+ 
+        function confirmYes() {
+            if (confirmCallback) confirmCallback();
+            closeConfirm();
+        }
+
+        function confirmNo() {
+            closeConfirm();
+        }
+ 
+        function closeConfirm() {
+            document.getElementById("custom-confirm").style.display = "none";
+        }
+ 
+        function showAlert(message) {
+            document.getElementById("alert-message").textContent = message;
+            document.getElementById("custom-alert").style.display = "flex";
+
+        }
+ 
+        function closeAlert() {
+            document.getElementById("custom-alert").style.display = "none";
+        }
+ 
+        let selectedMarker = null;
+        let selectedEntityType = null;
+        let selectedEntityId = null;
+
+        let selectedHouse = null;
+
+        function fetchHouses() { 
+            houseMarkers.forEach(marker => {
+                map.removeLayer(marker);
+            });
+            houseMarkers = [];  
+         
+            fetch('/api/house/all')
+                .then(response => response.json())
+                .then(houses => {
+                    houses.forEach(house => {
+                        const marker = L.marker([house.lat, house.lng], { icon: houseIcon }).addTo(map);
+                        
+                        // Update popup content - remove delete button
+                        marker.bindPopup(`
+                            <b>${house.name}</b>
+                            <div class="operations">
+                                <button class="action-btn add-resident" onclick="addResident('${house.id}')">Add Resident</button>
+                            </div>
+                        `);
+        
+                        // Add right-click handler for deletion
+                        marker.on('contextmenu', (e) => {
+                            e.originalEvent.preventDefault();
+                            selectedMarker = marker;
+                            selectedEntityType = 'house';
+                            selectedEntityId = house.id;
+                            
+                            const contextMenu = document.getElementById('markerContextMenu');
+                            contextMenu.style.left = e.originalEvent.pageX + 'px';
+                            contextMenu.style.top = e.originalEvent.pageY + 'px';
+                            contextMenu.style.display = 'block';
+                        });
+        
+                        marker.on('click', function() {
+                            showHouseOptions(house);
+                        });
+        
+                        houseMarkers.push(marker);
+
+                    });
+                })
+                .catch(error => console.error('Error fetching houses:', error));
+
+            
+        }
+        
+        function showHouseOptions(house) {
+            const messageSection = document.querySelector('.Message');
+            messageSection.innerHTML = `
+                <div class="InformationOP">
+                    <h3>${house.name} Household</h3>
+                    <div class="operations">
+                        <button class="action-btn add-resident" onclick="addResident('${house.id}')">Add Resident</button>
+                        <br>
+                    </div>
+                    <div class="residentInHouse" id="residentInHouse">
+    
+                    </div>
+                </div>
+            `;
+    
+            fetchResidentsForHouse(house.id);
+        }
+ 
+        function fetchResidentsForHouse(houseId) {
+            fetch(`/api/house/${houseId}/residents`)
+                .then(response => response.json())
+                .then(residents => {
+                    if (Array.isArray(residents)) {
+                        displayResidentsInHouse(residents, houseId);   
+                    } else {
+                        console.error('Residents data is not an array:', residents);
+                        showAlert('Error fetching residents.');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching residents:', error);
+                    showAlert('Error fetching residents.');
+                });
+        }
+        
+        
+
+        let selectedHouseId;
+ 
+        function addResident(houseId) {
+            selectedHouseId = houseId;
+            const modal = document.getElementById('resident-modal');
+            modal.style.display = 'block';
+            console.log("Resident Modal opened");
+            openResidentModal();
+        }
+         
+        function openResidentModal() {
+ 
+            fetch('/api/residents')
+                .then(response => response.json())
+                .then(residents => {
+                    console.log("Residents fetched", residents);  
+                    displayAllResidents(residents);
+                })
+                .catch(error => console.error('Error fetching residents:', error));
+        }
+         
+        function closeResidentModal() {
+            document.getElementById('resident-modal').style.display = 'none';
+        }
+        
+        function displayResidentsInHouse(residents, houseId) {  
+            const residentInHouseContainer = document.getElementById('residentInHouse');
+            
+            if (!residentInHouseContainer) {
+                console.error("Resident in house container not found.");
+                return;
+            }
+        
+            residentInHouseContainer.innerHTML = '';
+        
+            if (residents.length === 0) {
+                residentInHouseContainer.innerHTML = '<p class="no-residents">No residents found in this house.</p>';
+                return;
+            }
+        
+            residents.forEach(resident => {
+                const residentItem = document.createElement('div');
+                residentItem.classList.add('resident-item');
+                residentItem.innerHTML = `
+                    <div class="resident-info-container">
+                        <div class="resident-main-info">
+                            <div class="resident-name-section">
+                                ${resident.firstName} ${resident.lastName}
+                            </div>
+                            <div class="resident-details">
+                                <div class="resident-age-badge">
+                                    ${resident.age} <span class="age-label">years old</span>
+                                </div>
+                                <div class="resident-address-section">
+                                    ${resident.permanentAddress}
+                                </div>
+                            </div>
+                        </div>
+                        <button class="remove-resident-btn" onclick="removeResidentFromHouse(${houseId}, ${resident.id})">
+                            <span class="remove-icon">×</span>
+                            Remove
+                        </button>
+                    </div>
+                `;
+                residentInHouseContainer.appendChild(residentItem);
+            });
+        }
+        
+        function displayAllResidents(residents) {
+            const residentContainer = document.getElementById('residentContainer');
+            residentContainer.innerHTML = ''; 
+            
+            // Filter out deceased residents
+            const livingResidents = residents.filter(resident => !resident.isDeceased);
+            
+            if (livingResidents.length === 0) {
+                residentContainer.innerHTML = '<p class="no-residents">No residents found.</p>';
+                return;
+            }
+        
+            livingResidents.forEach(resident => {
+                const residentItem = document.createElement('div');
+                residentItem.classList.add('resident-modal-item');
+                residentItem.innerHTML = `
+                    <div class="modal-resident-info">
+                        <div class="modal-resident-primary">
+                            <span class="modal-resident-name">${resident.firstName} ${resident.lastName}</span>
+                            <span class="modal-resident-age">${resident.age} years old</span>
+                        </div>
+                        <div class="modal-resident-secondary">
+                            <span class="modal-resident-gender">${resident.gender}</span>
+                        </div>
+                    </div>
+                    <button class="add-to-house-btn" onclick="addResidentToHouse(${resident.id})">
+                        <span class="add-icon">+</span>
+                        Add to House
+                    </button>
+                `;
+                residentContainer.appendChild(residentItem);
+            });
+        }
+         
+        function filterResidents() {
+            const searchValue = document.getElementById('resident-search').value.toLowerCase();
+            const residentItems = document.querySelectorAll('.resident-item');
+        
+            residentItems.forEach(item => {
+                const text = item.textContent.toLowerCase();
+                item.style.display = text.includes(searchValue) ? '' : 'none';
+            });
+        }
+         
+        function addResidentToHouse(residentId) {
+            fetch(`/api/house/${selectedHouseId}/add-resident/${residentId}`, { method: 'POST' })
+                .then(response => response.json())
+                .then(updatedHouse => {
+                    showAlert(`Resident added to ${updatedHouse.name}`);
+                    fetchHouses();  
+                    closeResidentModal();  
+                })
+                .catch(error => console.error('Error adding resident:', error));
+        }
+ 
+        function removeResidentFromHouse(houseId, residentId) {
+            console.log("House ID: ", {houseId});
+            console.log("Res ID: ", {residentId});
+            if (!houseId || !residentId) {
+                console.error("Invalid houseId or residentId:", { houseId, residentId });
+                showAlert("Error: House ID or Resident ID is missing.");
+                return;
+            }
+        
+            fetch(`/api/house/${houseId}/remove-resident/${residentId}`, {
+                method: 'DELETE',
+                credentials: 'include'  
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`Error removing resident: ${response.statusText}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                showAlert("Resident removed successfully.");
+                fetchResidentsForHouse(houseId); 
+            })
+            .catch(error => {
+                console.error("Error removing resident:", error);
+                showAlert("Error removing resident.");
+            });
+        }
+        
+ 
+        function deleteHouse(houseId) {
+            showConfirm("Are you sure you want to delete this household?", () => {
+                fetch(`/api/house/delete/${houseId}`, { method: 'DELETE' })
+                    .then(response => {
+                        if (response.ok) {
+                            showAlert("Household deleted.");
+                            fetchHouses();  
+                        } else {
+                            showAlert("Failed to delete the household.");
+                        }
+                    })
+                    .catch(error => console.error('Error deleting house:', error));
+            });
+        } 
+        function showAddHousePopup(latlng) {
+            const messageSection = document.querySelector('.Message');
+            messageSection.innerHTML = `
+            <div class="Info">
+                <h3>Add New Household</h3>
+                <form id="add-house-form" class="newHouseHold">
+                    <label for="house-name">Household Name:</label>
+                    <input type="text" id="house-name" name="house-name" required>
+                    
+                    <input type="hidden" id="house-address" name="house-address">
+                    
+                    <input type="hidden" id="house-number" name="house-number">
+                    
+                    <input type="hidden" id="lat" name="lat" value="${latlng.lat}">
+                    <input type="hidden" id="lng" name="lng" value="${latlng.lng}">
+                    
+                    <button type="submit" class="action-btn">Add Household</button>
+                </form>
+            </div>
+            `;
+     
+        document.getElementById('add-house-form').addEventListener('submit', function(event) {
+            event.preventDefault();
+            
+            const houseName = document.getElementById('house-name').value;
+            const houseAddress = document.getElementById('house-address').value;   
+            const houseNumber = document.getElementById('house-number').value;     
+            const lat = document.getElementById('lat').value;
+            const lng = document.getElementById('lng').value;
+         
+            if (houseName) {
+                fetch('/api/house/add', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        name: houseName,
+                        address: houseAddress,   
+                        houseNumber: houseNumber,   
+                        lat: parseFloat(lat),
+                        lng: parseFloat(lng)
+                    })
+                })
+                .then(response => response.json())
+                .then(newHouse => {
+                    showAlert(`New house "${newHouse.name}" added!`);
+                    fetchHouses();   
+                })
+                .catch(error => console.error('Error adding house:', error));
+            } else {
+                alert('Please enter a valid household name');
+            }
+        });
+    }
+    function addTemporaryCircle(latlng) { 
+        const circle = L.circle(latlng, {
+            color: 'red',
+            fillColor: '#f03',
+            fillOpacity: 0.5,
+            radius: 5
+        }).addTo(map);
+     
+        setTimeout(() => {
+            map.removeLayer(circle);
+        }, 5000);  
+    }
+ 
+    function showAddOptionsPopup(latlng) { 
+        window.clickedLatLng = latlng;
+
+        const popup = document.getElementById('add-options-popup');
+        popup.style.display = 'block';
+    }
+ 
+    function selectAddOption(type) {
+        const latlng = window.clickedLatLng;
+        if (type === 'house') {
+            showAddHousePopup(latlng);
+        } else if (type === 'business') {
+            showAddEstablishmentPopup(latlng);
+        } else if (type === 'school') {
+            showAddSchoolPopup(latlng);
+        } else if (type === 'church') {
+            showAddChurchPopup(latlng);
+        }
+        closeAddOptionsPopup();
+    }
+    
+ 
+    function closeAddOptionsPopup() {
+        const popup = document.getElementById('add-options-popup');
+        popup.style.display = 'none';
+    }
+ 
+    function showAddEstablishmentPopup(latlng) {
+        closeAddOptionsPopup();
+        const messageSection = document.querySelector('.Message');
+        messageSection.innerHTML = `
+            <div class="Info" style="height: 100%";>
+                <div id="addBusinessModal" class="modalBusiness">
+                    <div class="modalBusiness-content">
+                        <h2>Add a New Business</h2>
+                        <form action="#" id="add-business-form" th:action="@{/add-business-form}" method="post">
+                            <input type="hidden" id="lat" name="lat" value="${latlng.lat}">
+                            <input type="hidden" id="lng" name="lng" value="${latlng.lng}">
+                            <label for="name">Business Name:</label>
+                            <input type="text" id="name" name="name" required>
+                            
+                            <label for="owner">Business Owner:</label>
+                            <input type="text" id="owner" name="owner" required>
+                            
+                            <label for="address">Business Address:</label>
+                            <input type="text" id="address" name="address" required>
+                            
+                            <label for="startDate">Business Start Date:</label>
+                            <input type="date" id="startDate" name="startDate" required>
+                            <br>
+                            <button type="submit" onclick="closeUponClick()">Add Business</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        `;
+                             
+        document.getElementById('add-business-form').addEventListener('submit', function (event) {
+            event.preventDefault();
+            
+            const businessName = document.getElementById('name').value;
+            const lat = document.getElementById('lat').value;
+            const lng = document.getElementById('lng').value;
+    
+            fetch('/api/businesses/add', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    name: document.getElementById('name').value,
+                    owner: document.getElementById('owner').value,
+                    address: document.getElementById('address').value,
+                    startDate: document.getElementById('startDate').value,
+                    lat: parseFloat(document.getElementById('lat').value),
+                    lng: parseFloat(document.getElementById('lng').value)
+                })
+            })
+            .then(response => {
+                if (!response.ok) throw new Error('Failed to add business');
+                return response.json();
+            })
+            .then(newBusiness => {
+                showAlert(`New business "${newBusiness.name}" added!`);
+                fetchHousesAndEstablishments();
+            })
+            .catch(error => {
+                console.error('Error adding business:', error);
+                showAlert('Failed to add business');
+            });
+        });
+    }
+
+    let establishmentMarkers = [];   
+
+    function showBusinessDetails(business) {
+        const messageSection = document.querySelector('.Message');
+        messageSection.innerHTML = `
+            <div class="Info" id="showBusinessData">
+                <div class="business-details-container">
+                    <h3 class="business-title">${business.name}</h3>
+                    <div class="business-info">
+                        <div class="info-row">
+                            <span class="info-label">Owner:</span>
+                            <span class="info-value">${business.owner}</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Address:</span>
+                            <span class="info-value">${business.address}</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Start Date:</span>
+                            <span class="info-value">${business.startDate}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+     
+    function fetchHousesAndEstablishments() { 
+        houseMarkers.forEach(marker => map.removeLayer(marker));
+        establishmentMarkers.forEach(marker => map.removeLayer(marker));
+    
+        houseMarkers = [];  
+        establishmentMarkers = [];
+    
+        fetch('/api/businesses/all')
+            .then(response => response.json())
+            .then(businesses => {
+                businesses.forEach(business => {
+                    const businessIcon = L.icon({
+                        iconUrl: '/image/business.png',
+                        iconSize: [25, 25],
+                        iconAnchor: [15, 30],
+                        popupAnchor: [0, -30]
+                    });
+                    const marker = L.marker([business.lat, business.lng], { icon: businessIcon }).addTo(map);
+                    marker.bindPopup(`<b>${business.name}</b>`);
+    
+                    // Add right-click (contextmenu) event listener
+                    marker.on('contextmenu', (e) => {
+                        showDeleteConfirmation(business, marker);
+                    });
+
+                    marker.on('click', (e) => {
+                        showBusinessDetails(business);
+                    });
+    
+                    businessMarkers.push(marker); 
+                    fetchHouses();
+                });
+            })
+            .catch(error => console.error('Error fetching business:', error));
+
+        // Fetching schools and adding markers
+        fetch('/api/school/all')
+            .then(response => response.json())
+            .then(schools => {
+                schools.forEach(school => {
+                    const schoolIcon = L.icon({
+                        iconUrl: '/image/school.png',
+                        iconSize: [25, 25],
+                        iconAnchor: [15, 30],
+                        popupAnchor: [0, -30]
+                    });
+                    const marker = L.marker([school.lat, school.lng], { icon: schoolIcon }).addTo(map);
+                    marker.bindPopup(`<b>${school.name}</b>`);
+
+                    // Right-click (contextmenu) to show delete confirmation
+                    marker.on('contextmenu', () => {
+                        showDeleteConfirm(school, marker, 'school');
+                    });
+                    schoolMarkers.push(marker);  // Assuming `schoolMarkers` array exists
+                });
+            })
+            .catch(error => console.error('Error fetching schools:', error));
+
+        // Fetching churches and adding markers
+        fetch('/api/church/all')
+            .then(response => response.json())
+            .then(churches => {
+                churches.forEach(church => {
+                    const churchIcon = L.icon({
+                        iconUrl: '/image/church.png',
+                        iconSize: [25, 25],
+                        iconAnchor: [15, 30],
+                        popupAnchor: [0, -30]
+                    });
+                    const marker = L.marker([church.lat, church.lng], { icon: churchIcon }).addTo(map);
+                    marker.bindPopup(`<b>${church.name}</b>`);
+
+                    // Right-click (contextmenu) to show delete confirmation
+                    marker.on('contextmenu', () => {
+                        showDeleteConfirm(church, marker, 'church');
+                    });
+                    churchMarkers.push(marker);  // Assuming `churchMarkers` array exists
+                    fetchHouses();
+                });
+            })
+            .catch(error => console.error('Error fetching churches:', error));
+
+        
+    }
+
+    function showDeleteConfirm(entity, marker, type) {
+        const confirmContainer = document.getElementById('custom-confirm');
+        const confirmMessage = document.getElementById('confirm-message');
+        
+        confirmMessage.textContent = `Do you want to delete "${entity.name}"?`;
+        confirmContainer.style.display = 'flex';
+    
+        const confirmYesButton = document.getElementById('confirm-yes');
+        const confirmNoButton = document.getElementById('confirm-no');
+    
+        confirmYesButton.onclick = function () {
+            deleteEntity(entity.id, marker, type);  // Pass the entity and type (school/church)
+            confirmContainer.style.display = 'none';
+        };
+    
+        confirmNoButton.onclick = function () {
+            confirmContainer.style.display = 'none';
+        };
+
+
+    }
+    
+
+    function showDeleteConfirmation(business, marker) {
+        const confirmContainer = document.getElementById('custom-confirm');
+        const confirmMessage = document.getElementById('confirm-message');
+    
+        confirmMessage.textContent = `Do you want to delete "${business.name}"?`;
+        confirmContainer.style.display = 'flex';
+    
+        // Handle "Yes" and "No" actions
+        const confirmYesButton = document.getElementById('confirm-yes');
+        const confirmNoButton = document.getElementById('confirm-no');
+    
+        confirmYesButton.onclick = function () {
+            deleteBusiness(business.id, marker);
+            confirmContainer.style.display = 'none';
+        };
+    
+        confirmNoButton.onclick = function () {
+            confirmContainer.style.display = 'none';
+        };
+    }
+    
+    function deleteSelectedMarker() {
+        if (selectedMarker && selectedEntityType && selectedEntityId) {
+            showDeleteConfirm(
+                { id: selectedEntityId, name: 'house' }, 
+                selectedMarker, 
+                selectedEntityType
+            );
+            document.getElementById('markerContextMenu').style.display = 'none';
+        }
+    }
+
+    function deleteSelectedHouse() {
+        if (selectedHouse) {
+            showDeleteConfirm(
+                selectedHouse.id,
+                selectedHouse.marker,
+                'house'
+            );
+            document.getElementById('markerContextMenu').style.display = 'none';
+        }
+    }
+
+    function deleteBusiness(id, marker) {
+        fetch(`/api/businesses/delete/${id}`, {
+            method: 'DELETE',
+        })
+        .then(response => {
+            if (response.ok) {
+                map.removeLayer(marker); // Remove the marker from the map
+                showAlert('Business deleted successfully!');
+            } else {
+                showAlert('Failed to delete the Business.');
+            }
+        })
+        .catch(error => {
+            console.error('Error deleting Business:', error);
+            showAlert('Error deleting Business.');
+        });
+    }
+    
+    function showAddSchoolPopup(latlng) {
+        const messageSection = document.querySelector('.Message');
+        messageSection.innerHTML = `
+            <div class="Info">
+                <h3>Add New School</h3>
+                <form id="add-school-form" class="newSchool">
+                    <label for="school-name">School Name:</label>
+                    <input type="text" id="school-name" name="school-name" required>
+                    
+                    <input type="hidden" id="lat" name="lat" value="${latlng.lat}">
+                    <input type="hidden" id="lng" name="lng" value="${latlng.lng}">
+                    
+                    <button type="submit" class="action-btn">Add School</button>
+                </form>
+            </div>
+        `;
+        document.getElementById('add-school-form').addEventListener('submit', function (event) {
+            event.preventDefault();
+            const schoolName = document.getElementById('school-name').value;
+            const lat = document.getElementById('lat').value;
+            const lng = document.getElementById('lng').value;
+    
+            fetch('/api/school/add', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ name: schoolName, lat: parseFloat(lat), lng: parseFloat(lng) })
+            })
+            .then(response => response.json())
+            .then(newSchool => {
+                showAlert(`New school "${newSchool.name}" added!`);
+                fetchHousesAndEstablishments();
+            })
+            .catch(error => console.error('Error adding school:', error));
+        });
+    }
+    
+    function showAddChurchPopup(latlng) {
+        const messageSection = document.querySelector('.Message');
+        messageSection.innerHTML = `
+            <div class="Info">
+                <h3>Add New Church</h3>
+                <form id="add-church-form" class="newChurch">
+                    <label for="church-name">Church Name:</label>
+                    <input type="text" id="church-name" name="church-name" required>
+                    
+                    <input type="hidden" id="lat" name="lat" value="${latlng.lat}">
+                    <input type="hidden" id="lng" name="lng" value="${latlng.lng}">
+                    
+                    <button type="submit" class="action-btn">Add Church</button>
+                </form>
+            </div>
+        `;
+        document.getElementById('add-church-form').addEventListener('submit', function (event) {
+            event.preventDefault();
+            const churchName = document.getElementById('church-name').value;
+            const lat = document.getElementById('lat').value;
+            const lng = document.getElementById('lng').value;
+    
+            fetch('/api/church/add', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ name: churchName, lat: parseFloat(lat), lng: parseFloat(lng) })
+            })
+            .then(response => response.json())
+            .then(newChurch => {
+                showAlert(`New church "${newChurch.name}" added!`);
+                fetchHousesAndEstablishments();
+            })
+            .catch(error => console.error('Error adding church:', error));
+        });
+    }
+    
+    function deleteEntity(id, marker, type) {
+        fetch(`/api/${type}/delete/${id}`, {
+            method: 'DELETE',
+        })
+        .then(response => {
+            if (response.ok) {
+                map.removeLayer(marker);  // Remove the marker from the map
+                showAlert(`${type.charAt(0).toUpperCase() + type.slice(1)} deleted successfully!`);
+                fetchHouses();
+            } else {
+                showAlert(`Failed to delete the ${type}.`);
+            }
+        })
+        .catch(error => {
+            console.error(`Error deleting ${type}:`, error);
+            showAlert(`Error deleting ${type}.`);
+        });
+    }
+    
+    // Add click handler to close context menu
+    document.addEventListener('click', function(e) {
+        const contextMenu = document.getElementById('markerContextMenu');
+        if (e.target.closest('#markerContextMenu') === null) {
+            contextMenu.style.display = 'none';
+        }
+    });
+
+    // Close context menu when clicking outside
+    document.addEventListener('click', (e) => {
+        if (!e.target.closest('.marker-context-menu')) {
+            document.getElementById('markerContextMenu').style.display = 'none';
+        }
+    });
+
+
+    let originalIconSizes = {
+        'school': 25,
+        'business': 25,
+        'church': 25,
+        'house': 25
+    };
+    
+    let enlargeTimeouts = {};
+    
+    function enlargeMarkers(markerType, duration = 3000) {
+        // Clear any existing timeout
+        if (enlargeTimeouts[markerType]) {
+            clearTimeout(enlargeTimeouts[markerType]);
+        }
+    
+        const markers = {
+            'school': schoolMarkers,
+            'business': businessMarkers,
+            'church': churchMarkers,
+            'house': houseMarkers
+        }[markerType];
+    
+        // Create enlarged icon
+        const enlargedIcon = L.icon({
+            iconUrl: `/image/${markerType}.png`,
+            iconSize: [40, 40], // Enlarged size
+            iconAnchor: [20, 40],
+            popupAnchor: [0, -40]
+        });
+    
+        // Original icon
+        const originalIcon = L.icon({
+            iconUrl: `/image/${markerType}.png`,
+            iconSize: [25, 25], // Original size
+            iconAnchor: [15, 30],
+            popupAnchor: [0, -30]
+        });
+    
+        // Enlarge markers
+        markers.forEach(marker => {
+            marker.setIcon(enlargedIcon);
+        });
+    
+        // Set timeout to restore original size
+        enlargeTimeouts[markerType] = setTimeout(() => {
+            markers.forEach(marker => {
+                marker.setIcon(originalIcon);
+            });
+        }, duration);
+    }
+    
+    // Add click handlers to legend items
+    document.addEventListener('DOMContentLoaded', () => {
+        document.getElementById('enlargeSchool').addEventListener('click', () => enlargeMarkers('school'));
+        document.getElementById('enlargeBusiness').addEventListener('click', () => enlargeMarkers('business'));
+        document.getElementById('enlargeChurch').addEventListener('click', () => enlargeMarkers('church'));
+        document.getElementById('enlargeHouse').addEventListener('click', () => enlargeMarkers('house'));
+    });
+
+        
+        window.onload = initMap;
+
+
+
+    </script>
+    
+    <style>
+        #map-container {
+            width: 100%;
+            height: 100%;
+            cursor: auto;
+        }
+        .context-menu {
+            position: absolute;
+            background: white;
+            border: 1px solid #ccc;
+            padding: 5px;
+            border-radius: 4px;
+            z-index: 1000;
+            box-shadow: 2px 2px 5px rgba(0,0,0,0.2);
+        }
+
+        .context-menu button {
+            display: block;
+            width: 100%;
+            padding: 5px 10px;
+            border: none;
+            background: none;
+            cursor: pointer;
+        }
+
+        .context-menu button:hover {
+            background: #f0f0f0;
+        }
+
+        .marker-context-menu {
+            position: absolute;
+            background: white;
+            border: 1px solid #ccc;
+            padding: 5px;
+            border-radius: 4px;
+            z-index: 1000;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+
+        .marker-context-menu button {
+            padding: 5px 10px;
+            width: 100%;
+            border: none;
+            background: none;
+            cursor: pointer;
+            text-align: left;
+        }
+
+        .marker-context-menu button:hover {
+            background: #f0f0f0;
+        }
+
+        .legendsIcon {
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .legendsIcon:hover {
+            transform: scale(1.1);
+        }
+
+        .business-details-container {
+            background: linear-gradient(to bottom, #0F3976, #205295);
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            color: white;
+        }
+
+        .business-title {
+            font-size: 1.8rem;
+            color: white;
+            margin: 0 0 20px 0;
+            padding-bottom: 10px;
+            border-bottom: 2px solid rgba(255, 255, 255, 0.2);
+            text-align: center;
+        }
+
+        .business-info {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .info-row {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .info-row:hover {
+            background: rgba(255, 255, 255, 0.15);
+            transform: translateX(5px);
+        }
+
+        .info-label {
+            font-weight: 600;
+            min-width: 100px;
+            color: #90CAF9;
+        }
+
+        .info-value {
+            color: white;
+            flex: 1;
+            padding-left: 10px;
+        }
+
+        #showBusinessData {
+            animation: fadeIn 0.3s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .resident-item {
+            margin-bottom: 15px;
+            animation: fadeIn 0.3s ease-in-out;
+        }
+
+        .resident-info-container {
+            background: linear-gradient(135deg, #0F3976, #205295);
+            border-radius: 12px;
+            padding: 16px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .resident-info-container:hover {
+            transform: translateX(5px);
+            background: linear-gradient(135deg, #124084, #2561B3);
+        }
+
+        .resident-main-info {
+            flex-grow: 1;
+            margin-right: 20px;
+        }
+
+        .resident-name-section {
+            color: white;
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+            letter-spacing: 0.3px;
+        }
+
+        .resident-details {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .resident-age-badge {
+            display: inline-flex;
+            align-items: center;
+            background: rgba(144, 202, 249, 0.15);
+            padding: 6px 12px;
+            border-radius: 20px;
+            color: #90CAF9;
+            font-weight: 500;
+            font-size: 0.9rem;
+            width: fit-content;
+            border: 1px solid rgba(144, 202, 249, 0.2);
+        }
+
+        .age-label {
+            color: rgba(255, 255, 255, 0.7);
+            margin-left: 4px;
+            font-size: 0.85rem;
+        }
+
+        .resident-address-section {
+            color: #e0e0e0;
+            font-size: 0.9rem;
+            opacity: 0.9;
+            padding-left: 2px;
+        }
+
+        .remove-resident-btn {
+            background: rgba(255, 59, 59, 0.1);
+            color: #ff5757;
+            border: 1px solid rgba(255, 59, 59, 0.3);
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+            white-space: nowrap;
+        }
+
+        .remove-resident-btn:hover {
+            background: rgba(255, 59, 59, 0.2);
+            transform: translateY(-2px);
+            box-shadow: 0 2px 8px rgba(255, 59, 59, 0.2);
+        }
+
+        .remove-icon {
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+
+        .no-residents {
+            color: #90CAF9;
+            text-align: center;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            font-style: italic;
+        }
+
+        /* Animation for new items */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Modal Resident List Styling */
+        .resident-modal-item {
+            background: linear-gradient(to right, #0F3976, #205295);
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            transition: transform 0.2s ease;
+        }
+
+        .resident-modal-item:hover {
+            transform: translateX(5px);
+        }
+
+        .modal-resident-info {
+            flex-grow: 1;
+            margin-right: 15px;
+        }
+
+        .modal-resident-primary {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 5px;
+        }
+
+        .modal-resident-name {
+            color: white;
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+
+        .modal-resident-age {
+            color: #90CAF9;
+            font-size: 0.9rem;
+            padding: 3px 8px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+        }
+
+        .modal-resident-secondary {
+            color: #e0e0e0;
+            font-size: 0.9rem;
+        }
+
+        .modal-resident-gender {
+            padding: 2px 8px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 4px;
+        }
+
+        .add-to-house-btn {
+            background: rgba(46, 204, 113, 0.1);
+            color: #2ecc71;
+            border: 1px solid rgba(46, 204, 113, 0.3);
+            padding: 8px 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+        }
+
+        .add-to-house-btn:hover {
+            background: rgba(46, 204, 113, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .add-icon {
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+
+        /* Modal search input styling */
+        #resident-search {
+            width: 100%;
+            padding: 10px 15px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.05);
+            color: white;
+            margin-bottom: 15px;
+            font-size: 1rem;
+        }
+
+        #resident-search::placeholder {
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        #resident-search:focus {
+            outline: none;
+            border-color: #90CAF9;
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        /* Modal container styling */
+        #resident-modal .modal-content {
+            background: linear-gradient(to bottom, #0F3976, #205295);
+            border-radius: 15px;
+            padding: 20px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        #resident-modal .modal-content h3 {
+            color: white;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+        }
+
+        /* Scrollbar styling for the modal */
+        #resident-modal .modal-content::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        #resident-modal .modal-content::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+        }
+
+        #resident-modal .modal-content::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 4px;
+        }
+
+        #resident-modal .modal-content::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+    </style>
+</body>
+</html>

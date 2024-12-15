@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <title>Barangay Wawa Portal</title>
+    <link rel="stylesheet" th:href="@{/css/Home.css}">
+    <link rel="icon" href="/favicon.png" type="image/png">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <script>
+        // Prevent caching
+        if (window.performance && window.performance.navigation.type === window.performance.navigation.TYPE_BACK_FORWARD) {
+            location.replace('/login?expired');
+        }
+
+        // Session check on load
+        document.addEventListener('DOMContentLoaded', checkSession);
+        
+        // Check on visibility change
+        document.addEventListener('visibilitychange', () => {
+            if (!document.hidden) checkSession();
+        });
+
+        function checkSession() {
+            fetch('/api/check-session', {
+                credentials: 'include',
+                headers: { 'Cache-Control': 'no-cache' }
+            })
+            .then(response => {
+                if (!response.ok) window.location.replace('/login?expired');
+            })
+            .catch(() => window.location.replace('/login?expired'));
+        }
+
+        // Prevent back button
+        window.addEventListener('popstate', () => {
+            checkSession();
+        });
+
+        function closeMenuBar() {
+            const menuBar = document.getElementById("MenuBar");
+            menuBar.style.display = "none";
+        }
+   
+        function toggleMenuBar() {
+            const menuBar = document.getElementById('MenuBar');
+            if (menuBar.style.display === 'none' || menuBar.style.display === '') {
+                menuBar.style.display = 'block'; 
+            } else {
+                menuBar.style.display = 'none';  
+            }
+        }
+
+        function initMap() {
+            var map = L.map('map-container').setView([14.815994911136649, 120.9046821934841], 16);  
+ 
+            L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+                maxZoom: 20,
+                attribution: 'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community'
+            }).addTo(map);
+            
+            var district1Coords = [                 
+                [14.816960928803324, 120.90833919661408],
+                [14.816004340459735, 120.9075305350192],
+                [14.815522449681932, 120.90740059946079],
+                [14.814740886418702, 120.90737296051745],
+                [14.813790091975733, 120.9074650903329],
+                [14.813629770256815, 120.90755491689858],
+                [14.813424914554437, 120.90778063493543],
+                [14.813340300186065, 120.90802477893449],
+                [14.813264544386794, 120.90869691963967],
+                [14.813194331211351, 120.90897774395629],
+                [14.813053904792191, 120.90916173230165],
+                [14.812780072989042, 120.90923435928644],
+                [14.812555390245098, 120.90916657410658],
+                [14.812295600531979, 120.90905037094109],
+                [14.812091981349887, 120.90886154079719],
+                [14.81194453285719, 120.90867028975397],
+                [14.811869638346286, 120.90845482971794],
+                [14.811792403354797, 120.90809653662437],
+                [14.811839212436146, 120.90743805200363],
+                [14.811991341905678, 120.90679651369416],
+                [14.813524224347153, 120.9036509443927],
+                [14.81381443821639, 120.90294162090333],
+                [14.81390571508546, 120.90241870664296],
+                [14.81392911940297, 120.90171664585145],
+                [14.81407124432713, 120.90142373874787],
+                [14.814092290492633, 120.90090126401462],
+                [14.814123859737048, 120.9007379906605],
+                [14.814176475134175, 120.90025905548836],
+                [14.814281705890105, 120.89979100520651],
+                [14.814381158099968, 120.89977898550886],
+                [14.814918463815888, 120.89944996317689],
+                [14.815253741917916, 120.89908759397969],
+                [14.81555248285712, 120.89877635663863],
+                [14.815758807307807, 120.89864963857484],
+                [14.815939341028887, 120.89858516798277],
+                [14.816104830141027, 120.89854292862933],
+                [14.816276766747006, 120.89854959800093],
+                [14.816468046071643, 120.89859406047809],
+                [14.816657176013559, 120.89865408482245],
+                [14.816775382143394, 120.89875634852022],
+                [14.816824813778558, 120.89886528158961],
+                [14.81680976936905, 120.89894309092486],
+                [14.816730248901434, 120.89911649458631],
+                [14.816579804693644, 120.89928767512389],
+                [14.81647879209549, 120.89934103009665],
+                [14.816312434734135, 120.89940463874748],
+                [14.816133652083945, 120.89946371406617],
+                [14.816113787335924, 120.89947141954254],
+                [14.816031845231096, 120.89950994692428],
+                [14.815900241179671, 120.89956131676664],
+                [14.815850579252704, 120.89965891946709],
+                [14.815763670853112, 120.89978477558086],
+                [14.815741322973292, 120.89998254947388],
+                [14.815793468022616, 120.90017775487479],
+                [14.815935004522967, 120.90032672743236],
+                [14.817191447296628, 120.90111525451877],
+                [14.817787385998347, 120.90141576810258],
+                [14.818142465350736, 120.90145429548436],
+                [14.818509959462055, 120.9013926516737],
+                [14.818586934498885, 120.901377240721],
+                [14.819216162078202, 120.9012306832041],
+                [14.81923998310832, 120.90136620669965],
+                [14.819259833963997, 120.90191240746078],
+                [14.819251893620955, 120.9025900249482],
+                [14.819228072592988, 120.90295963449283],
+                [14.81930350583904, 120.9032347882597],
+                [14.819305117724841, 120.90361008169697],
+                [14.819332000850517, 120.90413426437246],
+                [14.819526903399755, 120.9045458242419],
+                [14.8196590213213, 120.9048501040749],
+                [14.819546784425844, 120.905113585824],
+                [14.819245021462981, 120.90555086818917],
+                [14.81904405045041, 120.90593205101888],
+                [14.81899285928943, 120.90628697545746],
+                [14.818913997204369, 120.90677070312664],
+                [14.818122607680873, 120.90764942735457],
+                [14.81747233791041, 120.90851240896926],
+                [14.816960928803324, 120.90833919661408]
+
+            ];
+ 
+            L.polyline(district1Coords, { color: 'blue' }).addTo(map).bindPopup("District 1");
+
+            L.marker([14.815994911136649, 120.9046821934841]).addTo(map)
+            .bindPopup('BARANGAY WAWA')
+            .openPopup();
+        }
+        window.onload = initMap;
+    </script>
+    
+</head>
+<body>
+    <section class="mapWhole">
+        <div class="MaD">
+            <div class="Menu" tabindex="0" >
+                <a onclick="toggleMenuBar()" onkeypress="toggleMenuBar()" role="button"><img th:src="@{/image/Group-44.png}" alt="Menu"></a>
+            </div>
+            <div class="Menu" role="button" tabindex="0" onclick="toggleMenuBar()" onkeypress="toggleMenuBar()"></div>
+            <div class="Dash">
+                <a th:href="@{/Dashboard}" style="color: transparent;"><img th:src="@{/image/Group-31.png}" alt="Dashboard"></a>
+            </div>
+            <div class="MappingButton">
+                <a th:href="@{/Mapping}"><img th:src="@{/image/HouseLogo.png}" alt="Mapping"></a>
+            </div>     
+            <div class="Minus">
+                <a onclick="toggleMaV2()" role="button"><img th:src="@{/image/Minus.png}"></a>
+            </div>
+                     
+        </div>
+        <div class="MenuBar" id="MenuBar">
+            <div class="Return" onclick="closeMenuBar()">X</div>
+            <a th:href="@{/NewResident}" class="BarSlot">Add New Resident</a>
+            <a th:href="@{/FormMenu}" class="BarSlot">Request A Form</a>
+            <a th:href="@{/Records}" class="BarSlot">Resident Records</a>
+            <a th:href="@{/BusinessRecords}" class="BarSlot">Business Records</a>
+            <a th:href="@{/Blotter}" class="BarSlot">Blotter</a>
+            <a th:href="@{/login?logout}" class="BarSlot">Sign Out</a>
+        </div>  
+       
+        <div class="Mapp">
+            <div id="map-container"></div>
+        </div>  
+
+    </section>
+    <section class="MaV2">        
+        <div class="Logo">
+            <img th:src="@{/image/Logo.png}" class="logo" alt="Logo">
+            <div class="Big">MAP OF BARANGAY WAWA</div>
+        </div>
+        <div style="height: 10%; width: 100%;"></div>
+        <div class="Message">
+            <div class="BackWord"><b>Mission</b></div>
+            <div class="double-text"><b>Our mission is to empower the community of Barangay Wawa through the development and implementation of an innovative Barangay Mapping System. We aim to utilize technology to help local leaders manage things more efficiently, while also getting everyone in the community more involved.</b></div>
+            <div class="BackWord"><b>Vision</b></div>
+            <div class="double-text"><b>We imagine a future for Barangay Wawa where everyone can easily use a modern mapping system. This system will provide accurate information that helps residents and local leaders make smart choices, support community growth, and build a strong, thriving neighborhood.</b></div>
+        </div>
+    </section>
+</body>
+
+<script>
+    function toggleMaV2() {
+        const maV2 = document.querySelector('.MaV2');
+        if (maV2.classList.contains('slide-in')) {
+            maV2.classList.remove('slide-in');
+            maV2.classList.add('slide-out');
+        } else {
+            maV2.classList.remove('slide-out');
+            maV2.classList.add('slide-in');
+        }
+    }
+    
+    
+</script>
+
+</html>
