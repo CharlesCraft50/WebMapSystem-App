@@ -27,19 +27,18 @@ SET time_zone = "+00:00";
 -- Table structure for table `blotter_records`
 --
 
-CREATE TABLE blotter_records (
-  id BIGINT PRIMARY KEY,
-  case_number VARCHAR(255) NOT NULL,
-  complainant VARCHAR(255),
-  date VARCHAR(255),
-  description VARCHAR(255),
-  issued VARCHAR(255),
-  location VARCHAR(255),
-  recorded_by VARCHAR(255),
-  respondent VARCHAR(255),
-  status VARCHAR(255),
-  CONSTRAINT "UK_case_number" UNIQUE (case_number)
-);
+CREATE TABLE `blotter_records` (
+  `id` bigint(20) NOT NULL,
+  `case_number` varchar(255) NOT NULL,
+  `complainant` varchar(255) DEFAULT NULL,
+  `date` varchar(255) DEFAULT NULL,
+  `description` varchar(255) DEFAULT NULL,
+  `issued` varchar(255) DEFAULT NULL,
+  `location` varchar(255) DEFAULT NULL,
+  `recorded_by` varchar(255) DEFAULT NULL,
+  `respondent` varchar(255) DEFAULT NULL,
+  `status` varchar(255) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
 
@@ -47,23 +46,28 @@ CREATE TABLE blotter_records (
 -- Table structure for table `business`
 --
 
-CREATE TABLE business (
-  id BIGINT PRIMARY KEY,
-  address VARCHAR(255),
-  lat VARCHAR(255),
-  lng VARCHAR(255),
-  name VARCHAR(255),
-  owner VARCHAR(255),
-  start_date VARCHAR(255)
-);
+CREATE TABLE `business` (
+  `id` bigint(20) NOT NULL,
+  `address` varchar(255) DEFAULT NULL,
+  `lat` varchar(255) DEFAULT NULL,
+  `lng` varchar(255) DEFAULT NULL,
+  `name` varchar(255) DEFAULT NULL,
+  `owner` varchar(255) DEFAULT NULL,
+  `start_date` varchar(255) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
--- Table structure for table "church"
-CREATE TABLE church (
-  id BIGINT PRIMARY KEY,
-  lat DOUBLE PRECISION,
-  lng DOUBLE PRECISION,
-  name VARCHAR(255)
-);
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `church`
+--
+
+CREATE TABLE `church` (
+  `id` bigint(20) NOT NULL,
+  `lat` double DEFAULT NULL,
+  `lng` double DEFAULT NULL,
+  `name` varchar(255) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
 
@@ -71,106 +75,139 @@ CREATE TABLE church (
 -- Table structure for table `establishment`
 --
 
-CREATE TABLE establishment (
-  id BIGINT PRIMARY KEY,
-  description VARCHAR(255),
-  lat DOUBLE PRECISION NOT NULL,
-  lng DOUBLE PRECISION NOT NULL,
-  name VARCHAR(255)
-);
+CREATE TABLE `establishment` (
+  `id` bigint(20) NOT NULL,
+  `description` varchar(255) DEFAULT NULL,
+  `lat` double NOT NULL,
+  `lng` double NOT NULL,
+  `name` varchar(255) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
--- Table structure for table "house"
-CREATE TABLE house (
-  id BIGINT PRIMARY KEY,
-  address VARCHAR(255),
-  house_number VARCHAR(255),
-  lat DOUBLE PRECISION,
-  lng DOUBLE PRECISION,
-  name VARCHAR(255)
-);
+-- --------------------------------------------------------
 
--- Table structure for table "house_residents"
-CREATE TABLE house_residents (
-  house_id BIGINT NOT NULL,
-  resident_id BIGINT NOT NULL,
-  PRIMARY KEY (house_id, resident_id),
-  CONSTRAINT fk_house FOREIGN KEY (house_id) REFERENCES house(id),
-  CONSTRAINT fk_resident FOREIGN KEY (resident_id) REFERENCES residents(id)
-);
+--
+-- Table structure for table `house`
+--
 
--- Table structure for table "otps"
-CREATE TABLE otps (
-  id BIGINT PRIMARY KEY,
-  code VARCHAR(255) NOT NULL,
-  email VARCHAR(255) NOT NULL,
-  expiry_date TIMESTAMP(6) NOT NULL,
-  verified BOOLEAN NOT NULL
-);
+CREATE TABLE `house` (
+  `id` bigint(20) NOT NULL,
+  `address` varchar(255) DEFAULT NULL,
+  `house_number` varchar(255) DEFAULT NULL,
+  `lat` double DEFAULT NULL,
+  `lng` double DEFAULT NULL,
+  `name` varchar(255) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
--- Table structure for table "residents"
-CREATE TABLE residents (
-  id BIGINT PRIMARY KEY,
-  age INT NOT NULL,
-  birth_date VARCHAR(255),
-  birth_place VARCHAR(255),
-  certificate_of_indigency_count INT NOT NULL,
-  civil_status VARCHAR(255),
-  clearance_count INT NOT NULL,
-  first_name VARCHAR(255),
-  first_time_job_seeker_count INT NOT NULL,
-  gender VARCHAR(255),
-  is_deceased BOOLEAN,
-  last_name VARCHAR(255),
-  latitude DOUBLE PRECISION,
-  longitude DOUBLE PRECISION,
-  middle_name VARCHAR(255),
-  mobile_no VARCHAR(255),
-  nationality VARCHAR(255),
-  occupation VARCHAR(255),
-  permanent_address VARCHAR(255),
-  photo BYTEA,
-  pwd BOOLEAN,
-  suffix VARCHAR(255),
-  telephone_no VARCHAR(255),
-  temporary_address VARCHAR(255),
-  voting_eligibility VARCHAR(255)
-);
+-- --------------------------------------------------------
 
--- Table structure for table "role"
-CREATE TABLE role (
-  id BIGINT PRIMARY KEY,
-  name VARCHAR(255)
-);
+--
+-- Table structure for table `house_residents`
+--
 
--- Table structure for table "school"
-CREATE TABLE school (
-  id BIGINT PRIMARY KEY,
-  lat DOUBLE PRECISION,
-  lng DOUBLE PRECISION,
-  name VARCHAR(255)
-);
+CREATE TABLE `house_residents` (
+  `house_id` bigint(20) NOT NULL,
+  `resident_id` bigint(20) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
--- Table structure for table "user"
-CREATE TABLE "user" (
-  id BIGINT PRIMARY KEY,
-  email VARCHAR(255) NOT NULL,
-  enabled BOOLEAN NOT NULL,
-  first_name VARCHAR(255),
-  last_name VARCHAR(255),
-  otp VARCHAR(255),
-  otp_expiry TIMESTAMP(6),
-  password VARCHAR(255),
-  CONSTRAINT "UK_email" UNIQUE (email)
-);
+-- --------------------------------------------------------
 
--- Table structure for table "user_roles"
-CREATE TABLE user_roles (
-  user_id BIGINT NOT NULL,
-  role_id BIGINT NOT NULL,
-  PRIMARY KEY (user_id, role_id),
-  CONSTRAINT fk_user FOREIGN KEY (user_id) REFERENCES "user"(id),
-  CONSTRAINT fk_role FOREIGN KEY (role_id) REFERENCES role(id)
-);
+--
+-- Table structure for table `otps`
+--
+
+CREATE TABLE `otps` (
+  `id` bigint(20) NOT NULL,
+  `code` varchar(255) NOT NULL,
+  `email` varchar(255) NOT NULL,
+  `expiry_date` datetime(6) NOT NULL,
+  `verified` bit(1) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `residents`
+--
+
+CREATE TABLE `residents` (
+  `id` bigint(20) NOT NULL,
+  `age` int(11) NOT NULL,
+  `birth_date` varchar(255) DEFAULT NULL,
+  `birth_place` varchar(255) DEFAULT NULL,
+  `certificate_of_indigency_count` int(11) NOT NULL,
+  `civil_status` varchar(255) DEFAULT NULL,
+  `clearance_count` int(11) NOT NULL,
+  `first_name` varchar(255) DEFAULT NULL,
+  `first_time_job_seeker_count` int(11) NOT NULL,
+  `gender` varchar(255) DEFAULT NULL,
+  `is_deceased` bit(1) DEFAULT NULL,
+  `last_name` varchar(255) DEFAULT NULL,
+  `latitude` double DEFAULT NULL,
+  `longitude` double DEFAULT NULL,
+  `middle_name` varchar(255) DEFAULT NULL,
+  `mobile_no` varchar(255) DEFAULT NULL,
+  `nationality` varchar(255) DEFAULT NULL,
+  `occupation` varchar(255) DEFAULT NULL,
+  `permanent_address` varchar(255) DEFAULT NULL,
+  `photo` longblob DEFAULT NULL,
+  `pwd` bit(1) DEFAULT NULL,
+  `suffix` varchar(255) DEFAULT NULL,
+  `telephone_no` varchar(255) DEFAULT NULL,
+  `temporary_address` varchar(255) DEFAULT NULL,
+  `voting_eligibility` varchar(255) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `role`
+--
+
+CREATE TABLE `role` (
+  `id` bigint(20) NOT NULL,
+  `name` varchar(255) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `school`
+--
+
+CREATE TABLE `school` (
+  `id` bigint(20) NOT NULL,
+  `lat` double DEFAULT NULL,
+  `lng` double DEFAULT NULL,
+  `name` varchar(255) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `user`
+--
+
+CREATE TABLE `user` (
+  `id` bigint(20) NOT NULL,
+  `email` varchar(255) NOT NULL,
+  `enabled` bit(1) NOT NULL,
+  `first_name` varchar(255) DEFAULT NULL,
+  `last_name` varchar(255) DEFAULT NULL,
+  `otp` varchar(255) DEFAULT NULL,
+  `otp_expiry` datetime(6) DEFAULT NULL,
+  `password` varchar(255) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `user_roles`
+--
+
+CREATE TABLE `user_roles` (
+  `user_id` bigint(20) NOT NULL,
+  `role_id` bigint(20) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Indexes for dumped tables
