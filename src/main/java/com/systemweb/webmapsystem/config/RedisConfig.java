@@ -17,9 +17,8 @@ public class RedisConfig {
     @Bean
     public RedisConnectionFactory redisConnectionFactory() {
         RedisStandaloneConfiguration config = new RedisStandaloneConfiguration();
-        config.setHostName("oregon-redis.render.com");
+        config.setHostName("localhost");
         config.setPort(6379);
-        config.setPassword("J3rhLiQITWWtevxcS8DJFhvhWytZ3sEI");
         return new LettuceConnectionFactory(config);
     }
 
